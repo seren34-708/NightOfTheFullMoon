@@ -803,7 +803,7 @@
       <div class="howto-grid" style="margin-top:8px">
         <div class="howto-card"><strong>購入</strong>ユニットをクリックして購入。盤面が満杯ならベンチへ</div>
         <div class="howto-card"><strong>🎲 リロール（1G）</strong>ショップのラインナップを全て入れ替える</div>
-        <div class="howto-card"><strong>⬆️ EXP購入（1G）</strong>1Gで EXP+1。レベルが上がると高Tierが出やすくなる</div>
+        <div class="howto-card"><strong>⬆️ EXP購入（2G）</strong>2Gで EXP+1。レベルが上がると高Tierが出やすくなる</div>
         <div class="howto-card"><strong>売却</strong>ユニット選択後「売却」ボタン。★の数だけGoldが戻る</div>
       </div>
     </div>
@@ -872,7 +872,7 @@
         <div class="shop-grid" id="shop"></div>
         <div class="shop-actions">
           <button class="btn btn-gold" onclick="reroll()">🎲 リロール <span style="color:var(--text-dim);font-size:10px">(1G)</span></button>
-          <button class="btn btn-secondary" onclick="buyExp(1)">⬆️ EXP+1 <span style="color:var(--text-dim);font-size:10px">(1G)</span></button>
+          <button class="btn btn-secondary" onclick="buyExp(1)">⬆️ EXP+1 <span style="color:var(--text-dim);font-size:10px">(2G)</span></button>
           <div style="flex:1"></div>
           <button class="btn btn-start" onclick="startBattle()" id="btn-start" style="width:auto;padding:6px 20px;">⚔️ 戦闘開始</button>
         </div>
@@ -999,13 +999,6 @@ const SHOP_TIER_PROBS = {
   10: [[3,20],[4,40],[5,40]],
 };
 
-const ENEMY_TIER_PROBS = {
-  early:  [[1,70],[2,30]],     // 1-4
-  mid1:   [[1,40],[2,40],[3,20]],  // 5-9
-  mid2:   [[2,30],[3,50],[4,20]],  // 10-14
-  late:   [[3,30],[4,50],[5,20]],  // 15-20
-};
-
 const EXP_REQ = [4,6,8,10,12,14,16,18,20,0]; // idx = lv-1, Lv1→2:4, ..., Lv10:0(max)
 
 // ========== GAME STATE ==========
@@ -1014,7 +1007,7 @@ let G = {};
 function newGame() {
   G = {
     round: 1,
-    gold: 10,
+    gold: 5,
     life: 3,
     level: 1,
     exp: 0,
@@ -1030,7 +1023,6 @@ function newGame() {
     rng: null,
   };
   G.rng = makeRng(G.seed);
-  grantIncome();
   refreshShop();
   render();
   addLog("system","ゲーム開始。Round 1 の準備フェーズです。");
@@ -1053,11 +1045,31 @@ function weightedPick(table) {
   return table[table.length-1][0];
 }
 
+// ========== ROUND-BASED ECONOMY TABLE ==========
+// 連勝ボーナス廃止。その分収入・勝利報酬に分散。
+// [maxRound, 収入, 勝利Gold, 勝利EXP]
+const ROUND_ECONOMY = [
+  //  maxRound, income, winGold, winExp
+  [  3,   4,   3,  1 ],  // R1-3:  序盤 / 4収入＋勝利3G
+  [  6,   5,   4,  1 ],  // R4-6:  中序盤 / 安定してきたら少し余裕
+  [  9,   6,   5,  2 ],  // R7-9:  中盤 / EXP増でTier上昇促す
+  [ 12,   7,   5,  2 ],  // R10-12: 中盤後半
+  [ 15,   8,   6,  2 ],  // R13-15: 終盤手前 / 大型購入圏
+  [ 18,   9,   7,  3 ],  // R16-18: 終盤 / 高tier合成狙い
+  [ 20,  10,   8,  3 ],  // R19-20: 最終盤 / 豪快な報酬
+];
+
+function getRoundEconomy(round) {
+  for (const [max, income, winGold, winExp] of ROUND_ECONOMY) {
+    if (round <= max) return { income, winGold, winExp };
+  }
+  return { income: 10, winGold: 8, winExp: 3 };
+}
+
 // ========== INCOME ==========
 function grantIncome() {
-  G.gold += 5;
-  // win bonus: we track in G.lastResult
-  if (G.lastResult === "win") G.gold += 1;
+  const { income } = getRoundEconomy(G.round);
+  G.gold += income;
 }
 
 // ========== SHOP ==========
@@ -1123,11 +1135,12 @@ function reroll() {
 }
 
 function buyExp(n) {
-  if (G.gold < n) { addLog("system","ゴールドが足りません"); return; }
+  const cost = n * 2; // 2G で 1EXP
+  if (G.gold < cost) { addLog("system","ゴールドが足りません"); return; }
   if (G.level >= 10) { addLog("system","最大レベルです"); return; }
-  G.gold -= n; G.exp += n;
+  G.gold -= cost; G.exp += n;
   levelUpCheck();
-  addLog("gold",`EXP +${n} (-${n}G)`);
+  addLog("gold",`EXP +${n} (-${cost}G)`);
   render();
 }
 
@@ -1297,20 +1310,60 @@ function startBattle() {
   runBattleStep();
 }
 
+// ========== ENEMY BALANCE TABLE ==========
+// [maxRound, budget, tierTable]
+const ENEMY_ROUNDS = [
+  // [maxRound, budget, tierTable]
+  // ── 序盤 (R1-5): T1中心。プレイヤーは5G+収入4G=9G/ラウンドで戦力構築中 ──
+  [  1,  4, [[1,100]]                          ],  // R1: T1×4体 / チュートリアル
+  [  2,  6, [[1,100]]                          ],  // R2: T1×6体 / 盤面を埋めさせる
+  [  3,  8, [[1,80],[2,20]]                    ],  // R3: T1多め・T2顔見せ
+  [  4, 10, [[1,65],[2,35]]                    ],  // R4: T2が増えてくる
+  [  5, 13, [[1,45],[2,50],[3,5]]              ],  // R5: T2主体・T3登場
+  // ── 中序盤 (R6-9): T2/T3混在。プレイヤーはLv3-4でT3を狙い始める頃 ──
+  [  6, 16, [[1,25],[2,55],[3,20]]             ],  // R6: T2中心
+  [  7, 19, [[1,10],[2,50],[3,35],[4,5]]       ],  // R7: T3台頭
+  [  8, 23, [[2,30],[3,55],[4,15]]             ],  // R8: T3中心
+  [  9, 27, [[2,15],[3,55],[4,30]]             ],  // R9: T4本格登場
+  // ── 中盤 (R10-13): T3/T4混在。プレイヤーはLv5-6で★合成やT4を狙う ──
+  [ 10, 31, [[2,10],[3,45],[4,38],[5,7]]       ],  // R10: 折り返し・T5顔見せ
+  [ 11, 35, [[3,35],[4,50],[5,15]]             ],  // R11: T4中心
+  [ 12, 39, [[3,25],[4,52],[5,23]]             ],  // R12
+  [ 13, 44, [[3,15],[4,50],[5,35]]             ],  // R13: T5が3割超え
+  // ── 中終盤 (R14-17): T4/T5主体。プレイヤーはLv7-8で高tier編成完成期 ──
+  [ 14, 49, [[3,10],[4,45],[5,45]]             ],  // R14
+  [ 15, 54, [[3,5],[4,40],[5,55]]              ],  // R15: T5が過半数
+  [ 16, 59, [[4,40],[5,60]]                    ],  // R16: T4/T5のみ
+  [ 17, 64, [[4,30],[5,70]]                    ],  // R17
+  // ── 終盤 (R18-20): T5中心。プレイヤーはLv9-10・★2-3で対抗 ──
+  [ 18, 70, [[4,20],[5,80]]                    ],  // R18
+  [ 19, 76, [[4,10],[5,90]]                    ],  // R19: ほぼT5
+  [ 20, 82, [[5,100]]                          ],  // R20: T5のみ・最大6体
+];
+
+function getEnemyConfig(round) {
+  for (const [max, budget, table] of ENEMY_ROUNDS) {
+    if (round <= max) return { budget, table };
+  }
+  return { budget: 80, table: [[5,100]] };
+}
+
 function generateEnemy() {
   const round = G.round;
-  let table;
-  if (round<=4) table=ENEMY_TIER_PROBS.early;
-  else if (round<=9) table=ENEMY_TIER_PROBS.mid1;
-  else if (round<=14) table=ENEMY_TIER_PROBS.mid2;
-  else table=ENEMY_TIER_PROBS.late;
-
-  const budget = 6 + round*2;
+  const { budget, table } = getEnemyConfig(round);
   let spent = 0;
   const units = [];
   while (spent < budget) {
     const tier = weightedPick(table);
-    if (spent + tier > budget) break;
+    if (spent + tier > budget) {
+      // 予算オーバーなら1つ下のTierで試みる（無駄予算を減らす）
+      const fallback = tier - 1;
+      if (fallback >= 1 && spent + fallback <= budget) {
+        const pool2 = UNITS_DATA.filter(u=>u.tier===fallback);
+        if (pool2.length) { units.push(makeUnit(pool2[rnd(pool2.length)],1)); spent+=fallback; continue; }
+      }
+      break;
+    }
     const pool = UNITS_DATA.filter(u=>u.tier===tier);
     const def = pool[rnd(pool.length)];
     units.push(makeUnit(def,1));
@@ -1402,23 +1455,23 @@ function endBattle(result) {
   Audio.stopBgm();
   setTimeout(()=>{
     if (result==="win") {
-      G.gold += 3; G.exp += 1;
+      const { winGold, winExp } = getRoundEconomy(G.round);
+      G.gold += winGold; G.exp += winExp;
       G.lastResult = "win";
-      addBattleLog("win","🏆 勝利！ +3G +1EXP");
+      addBattleLog("win",`🏆 勝利！ +${winGold}G +${winExp}EXP`);
       levelUpCheck();
       Audio.playWin();
-      showModal("win","勝利！",`+3G / +1EXP を獲得　❤ Life: ${G.life}`);
+      showModal("win","勝利！",`+${winGold}G / +${winExp}EXP を獲得　❤ Life: ${G.life}`);
     } else if (result==="lose") {
-      const dmg = 1 + Math.floor(G.round/5);
-      G.life -= dmg;
+      G.life -= 1;
       G.lastResult = "lose";
-      addBattleLog("lose",`😞 敗北… Life -${dmg} (残り: ${G.life})`);
+      addBattleLog("lose",`😞 敗北… Life -1 (残り: ${G.life})`);
       Audio.playLose();
       if (G.life<=0) {
         showModal("lose","ゲームオーバー",`Round ${G.round} で力尽きた…`);
         return;
       }
-      showModal("lose","敗北",`Life -${dmg} → 残り ${G.life}`);
+      showModal("lose","敗北",`Life -1 → 残り ${G.life}`);
     } else {
       G.lastResult = "draw";
       addBattleLog("system","引き分け");
@@ -1443,8 +1496,9 @@ function afterBattle() {
   grantIncome();
   refreshShop();
   render();
+  const { income } = getRoundEconomy(G.round);
   addLog("info",`━━━ Round ${G.round} 開始 ━━━`);
-  addLog("gold",`収入: Gold → ${G.gold}`);
+  addLog("gold",`収入: +${income}G → 所持 ${G.gold}G`);
   Audio.playBgm('prep');
 }
 
