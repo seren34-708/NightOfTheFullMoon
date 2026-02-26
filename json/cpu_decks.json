@@ -1,0 +1,320 @@
+[
+  {
+    "deck_id": "r01_swarm",
+    "name": "序盤：群れ",
+    "round_range": {
+      "min": 1,
+      "max": 4
+    },
+    "placements": [
+      {
+        "id": "c1_rat",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "t1_soldier",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c1_wisp",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "t1_archer",
+        "star": 1,
+        "row": 1,
+        "col": 1
+      }
+    ]
+  },
+  {
+    "deck_id": "r02_wall",
+    "name": "序盤：壁＋後衛",
+    "round_range": {
+      "min": 1,
+      "max": 4
+    },
+    "placements": [
+      {
+        "id": "t1_guard",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "t1_slime",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "t1_guard",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "t1_archer",
+        "star": 1,
+        "row": 1,
+        "col": 0
+      },
+      {
+        "id": "t1_thief",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  },
+  {
+    "deck_id": "r05_mixed",
+    "name": "中盤：混成",
+    "round_range": {
+      "min": 5,
+      "max": 9
+    },
+    "placements": [
+      {
+        "id": "t2_knight",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "t2_orc",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "t2_lancer",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "t2_mage",
+        "star": 1,
+        "row": 1,
+        "col": 0
+      },
+      {
+        "id": "c2_hunter",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  },
+  {
+    "deck_id": "r06_spike",
+    "name": "中盤：火力スパイク",
+    "round_range": {
+      "min": 5,
+      "max": 9
+    },
+    "placements": [
+      {
+        "id": "c2_brute",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "t2_lancer",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c2_brute",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "t2_mage",
+        "star": 1,
+        "row": 1,
+        "col": 1
+      }
+    ]
+  },
+  {
+    "deck_id": "r10_elite",
+    "name": "中盤後半：エリート",
+    "round_range": {
+      "min": 10,
+      "max": 14
+    },
+    "placements": [
+      {
+        "id": "t3_paladin",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "c3_golem",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "t3_shaman",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "t3_assassin",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  },
+  {
+    "deck_id": "r11_caster",
+    "name": "中盤後半：術師隊",
+    "round_range": {
+      "min": 10,
+      "max": 14
+    },
+    "placements": [
+      {
+        "id": "t3_paladin",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c3_witch",
+        "star": 1,
+        "row": 1,
+        "col": 0
+      },
+      {
+        "id": "t3_shaman",
+        "star": 1,
+        "row": 1,
+        "col": 1
+      },
+      {
+        "id": "c3_witch",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  },
+  {
+    "deck_id": "r15_boss_dragon",
+    "name": "終盤：ドラゴンボス",
+    "round_range": {
+      "min": 15,
+      "max": 20
+    },
+    "placements": [
+      {
+        "id": "t4_dragon",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c4_behemoth",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "c4_sniper",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      },
+      {
+        "id": "t4_warlock",
+        "star": 1,
+        "row": 1,
+        "col": 0
+      }
+    ]
+  },
+  {
+    "deck_id": "r18_overlord",
+    "name": "終盤：オーバーロード",
+    "round_range": {
+      "min": 15,
+      "max": 20
+    },
+    "placements": [
+      {
+        "id": "t5_overlord",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c4_behemoth",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "t4_warlock",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "c4_sniper",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  },
+  {
+    "deck_id": "r20_titan",
+    "name": "最終：タイタン",
+    "round_range": {
+      "min": 20,
+      "max": 20
+    },
+    "placements": [
+      {
+        "id": "c5_titan",
+        "star": 1,
+        "row": 0,
+        "col": 1
+      },
+      {
+        "id": "c4_behemoth",
+        "star": 1,
+        "row": 0,
+        "col": 0
+      },
+      {
+        "id": "c4_behemoth",
+        "star": 1,
+        "row": 0,
+        "col": 2
+      },
+      {
+        "id": "c5_phantom",
+        "star": 1,
+        "row": 1,
+        "col": 2
+      }
+    ]
+  }
+]

@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鏡の中の記憶 - Auto Battler</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Shippori+Mincho:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a12;
+    --bg2: #10101e;
+    --bg3: #16162a;
+    --border: #2a2a4a;
+    --accent: #6a7fff;
+    --accent2: #a78bfa;
+    --gold: #f5c842;
+    --red: #ff6b6b;
+    --green: #6bff9e;
+    --text: #e8e8f0;
+    --text-dim: #8888aa;
+    --front-color: #1a3a5c;
+    --back-color: #1a2a4a;
+    --enemy-front: #3a1a1a;
+    --enemy-back: #2a1a1a;
+    --star1: #aaa;
+    --star2: #7df;
+    --star3: #fa0;
+    --t1: #6b7280;
+    --t2: #10b981;
+    --t3: #3b82f6;
+    --t4: #8b5cf6;
+    --t5: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: radial-gradient(ellipse at 20% 20%, rgba(106,127,255,0.05) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.05) 0%, transparent 60%);
+  }
+
+  #app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .game-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-shadow: 0 0 20px rgba(167,139,250,0.4);
+  }
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; align-items: center; gap: 6px; }
+  .stat-label { color: var(--text-dim); }
+  .stat-val { font-weight: 700; }
+  .stat-val.gold { color: var(--gold); }
+  .stat-val.life { color: var(--red); }
+  .stat-val.exp { color: var(--green); }
+  .stat-val.round { color: var(--accent); }
+
+  /* MAIN LAYOUT */
+  .main-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .left-col { display: flex; flex-direction: column; gap: 12px; }
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  /* PANELS */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .panel-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* BOARDS */
+  .boards-wrapper {
+    display: flex;
+    gap: 12px;
+    flex-direction: column;
+  }
+  .board-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .cell {
+    aspect-ratio: 1.4;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    font-size: 11px;
+  }
+  .cell.front { background: var(--front-color); }
+  .cell.back { background: var(--back-color); }
+  .cell.enemy-front { background: var(--enemy-front); }
+  .cell.enemy-back { background: var(--enemy-back); }
+  .cell.empty { opacity: 0.4; }
+  .cell.selected { border-color: var(--accent) !important; box-shadow: 0 0 8px rgba(106,127,255,0.5); }
+  .cell.target-hint { border-color: var(--gold) !important; border-style: dashed; }
+  .cell:hover:not(.empty) { border-color: var(--accent2); }
+
+  /* UNIT CARD IN CELL */
+  .unit-in-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+  }
+  .unit-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .unit-name-cell {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+  }
+  .unit-stars {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .star1 { color: var(--star1); }
+  .star2 { color: var(--star2); }
+  .star3 { color: var(--star3); }
+  .unit-hp-bar {
+    width: 90%;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+    margin-top: 2px;
+    overflow: hidden;
+  }
+  .unit-hp-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+    background: var(--green);
+  }
+  .tier-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .t1 { background: var(--t1); }
+  .t2 { background: var(--t2); }
+  .t3 { background: var(--t3); }
+  .t4 { background: var(--t4); }
+  .t5 { background: var(--t5); }
+
+  /* BENCH */
+  .bench-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+  .bench-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #0e0e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    font-size: 11px;
+  }
+  .bench-cell.selected { border-color: var(--accent) !important; box-shadow: 0 0 8px rgba(106,127,255,0.5); }
+  .bench-cell:hover:not(.empty) { border-color: var(--accent2); }
+  .bench-cell.empty { opacity: 0.3; }
+
+  /* SHOP */
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .shop-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg3);
+    padding: 8px 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+  .shop-card:hover { border-color: var(--accent2); background: #1e1e30; }
+  .shop-card.sold { opacity: 0.3; pointer-events: none; }
+  .shop-card.cant-afford { opacity: 0.6; }
+  .shop-icon { font-size: 22px; }
+  .shop-name { font-size: 10px; color: var(--text-dim); text-align: center; }
+  .shop-cost {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .shop-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* BUTTONS */
+  .btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover:not(:disabled) { background: #8090ff; }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-gold {
+    background: transparent;
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .btn-gold:hover:not(:disabled) { background: rgba(245,200,66,0.1); }
+  .btn-red {
+    background: transparent;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-red:hover:not(:disabled) { background: rgba(255,107,107,0.1); }
+  .btn-start {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-start:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* SELL PANEL */
+  .sell-panel {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* LOG */
+  .log-box {
+    height: 180px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    font-family: 'Courier New', monospace;
+  }
+  .log-box::-webkit-scrollbar { width: 4px; }
+  .log-box::-webkit-scrollbar-track { background: transparent; }
+  .log-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .log-entry { padding: 1px 0; }
+  .log-entry.attack { color: #ff9944; }
+  .log-entry.death { color: var(--red); }
+  .log-entry.win { color: var(--green); font-weight: 700; }
+  .log-entry.lose { color: var(--red); font-weight: 700; }
+  .log-entry.info { color: var(--accent); }
+  .log-entry.merge { color: var(--accent2); }
+  .log-entry.gold { color: var(--gold); }
+  .log-entry.system { color: var(--text-dim); font-style: italic; }
+
+  /* EXP BAR */
+  .exp-bar {
+    width: 100%;
+    height: 6px;
+    background: #1a1a2a;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .exp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    border-radius: 3px;
+    transition: width 0.4s;
+  }
+  .exp-text { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+  /* MODAL / OVERLAY */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+  }
+  .modal h2 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+  .modal.win h2 { color: var(--green); }
+  .modal.lose h2 { color: var(--red); }
+  .modal p { color: var(--text-dim); margin-bottom: 20px; }
+
+  /* BATTLE VIEW */
+  #battle-view {
+    display: none;
+  }
+  #battle-view.active {
+    display: block;
+  }
+  #prep-view {
+    display: block;
+  }
+  #prep-view.hidden {
+    display: none;
+  }
+
+  .battle-boards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .battle-divider {
+    text-align: center;
+    font-size: 18px;
+    color: var(--red);
+    letter-spacing: 0.3em;
+    padding: 2px 0;
+    text-shadow: 0 0 10px rgba(255,107,107,0.5);
+  }
+  .battle-side-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+  .battle-side-label.player { color: var(--accent); }
+  .battle-side-label.enemy { color: var(--red); }
+
+  /* PHASE INDICATOR */
+  .phase-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .phase-badge.prep { background: rgba(106,127,255,0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .phase-badge.battle { background: rgba(255,107,107,0.2); color: var(--red); border: 1px solid var(--red); }
+
+  /* Highlight battling unit */
+  @keyframes pulse-attack {
+    0% { box-shadow: 0 0 0 0 rgba(255,150,60,0.7); }
+    50% { box-shadow: 0 0 0 8px rgba(255,150,60,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,150,60,0); }
+  }
+  .attacking { animation: pulse-attack 0.4s ease-out; }
+
+  /* Selection hint */
+  .hint-text {
+    font-size: 11px;
+    color: var(--accent2);
+    min-height: 16px;
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+
+  .divider { border-top: 1px solid var(--border); margin: 8px 0; }
+
+  .battle-speed-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .speed-label { font-size: 11px; color: var(--text-dim); }
+  input[type=range] { accent-color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="game-title">鏡の中の記憶</div>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">Round</span><span class="stat-val round" id="stat-round">1</span></div>
+      <div class="stat"><span class="stat-label">💰</span><span class="stat-val gold" id="stat-gold">10</span></div>
+      <div class="stat"><span class="stat-label">❤️</span><span class="stat-val life" id="stat-life">3</span></div>
+      <div class="stat"><span class="stat-label">Lv</span><span class="stat-val" id="stat-lv">1</span></div>
+      <div class="stat" id="phase-badge-wrap"><span class="phase-badge prep" id="phase-badge">準備</span></div>
+    </div>
+  </div>
+
+  <!-- PREP VIEW -->
+  <div id="prep-view">
+    <div class="main-area">
+      <!-- SHOP at top -->
+      <div class="panel">
+        <div class="panel-title">ショップ</div>
+        <div class="shop-grid" id="shop"></div>
+        <div class="shop-actions">
+          <button class="btn btn-gold" onclick="reroll()">🎲 リロール <span style="color:var(--text-dim);font-size:10px">(1G)</span></button>
+          <button class="btn btn-secondary" onclick="buyExp(1)">⬆️ EXP+1 <span style="color:var(--text-dim);font-size:10px">(1G)</span></button>
+          <div style="flex:1"></div>
+          <button class="btn btn-start" onclick="startBattle()" id="btn-start" style="width:auto;padding:6px 20px;">⚔️ 戦闘開始</button>
+        </div>
+        <div class="divider"></div>
+        <div class="exp-text"><span id="exp-info"></span></div>
+        <div class="exp-bar"><div class="exp-fill" id="exp-fill" style="width:0%"></div></div>
+      </div>
+
+      <!-- BOARD: player (bottom of screen = shown last visually, but after shop) -->
+      <div class="panel">
+        <div class="panel-title">盤面（Board）</div>
+        <div class="hint-text" id="hint-text">ユニットをクリックして選択、空きマスに配置できます</div>
+        <div id="sell-hint-panel" style="display:none;margin-bottom:8px" class="sell-panel">
+          <span id="sell-hint-text">選択中: -</span>
+          <button class="btn btn-red" onclick="sellSelected()">売却</button>
+        </div>
+        <!-- Back row shown first (farther from player = top visually in prep) -->
+        <div class="board-label">Back Row（後列）</div>
+        <div class="board-grid" id="player-back"></div>
+        <div style="height:8px"></div>
+        <div class="board-label">Front Row（前列）</div>
+        <div class="board-grid" id="player-board"></div>
+      </div>
+
+      <!-- BENCH -->
+      <div class="panel">
+        <div class="panel-title">ベンチ（Bench）</div>
+        <div class="bench-grid" id="bench"></div>
+      </div>
+
+      <!-- LOG -->
+      <div class="panel">
+        <div class="panel-title">ログ</div>
+        <div class="log-box" id="log-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BATTLE VIEW -->
+  <div id="battle-view">
+    <div class="panel" style="margin-bottom:12px;max-width:520px;margin-left:auto;margin-right:auto;">
+      <div class="panel-title">⚔️ 戦闘中...</div>
+      <div class="battle-boards">
+        <!-- ENEMY: top -->
+        <div>
+          <div class="battle-side-label enemy">👹 敵</div>
+          <div class="board-label">Back</div>
+          <div class="board-grid" id="battle-enemy-back"></div>
+          <div style="height:6px"></div>
+          <div class="board-label">Front</div>
+          <div class="board-grid" id="battle-enemy-front"></div>
+        </div>
+        <!-- DIVIDER -->
+        <div class="battle-divider">⚔ ── VS ── ⚔</div>
+        <!-- PLAYER: bottom -->
+        <div>
+          <div class="board-label">Front</div>
+          <div class="board-grid" id="battle-player-front"></div>
+          <div style="height:6px"></div>
+          <div class="board-label">Back</div>
+          <div class="board-grid" id="battle-player-back"></div>
+          <div class="battle-side-label player" style="margin-top:6px">🛡 味方</div>
+        </div>
+      </div>
+      <div class="battle-speed-row">
+        <span class="speed-label">速度:</span>
+        <input type="range" min="0" max="3" step="1" value="1" id="speed-slider" onchange="updateSpeed()">
+        <span class="speed-label" id="speed-label">普通</span>
+      </div>
+    </div>
+    <div class="panel" style="max-width:520px;margin-left:auto;margin-right:auto;">
+      <div class="panel-title">戦闘ログ</div>
+      <div class="log-box" id="battle-log-box"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal" style="display:none">
+  <div class="modal" id="modal-box">
+    <h2 id="modal-title"></h2>
+    <p id="modal-body"></p>
+    <button class="btn btn-primary" onclick="closeModal()">続ける</button>
+  </div>
+</div>
+
+<script>
+// ========== UNIT DATA ==========
+const UNITS_DATA = [
+  // Tier 1
+  { id:"t1_sword",  name:"剣士",     tier:1, atk_base:3, hp_base:12, icon:"⚔️" },
+  { id:"t1_shield", name:"盾兵",     tier:1, atk_base:2, hp_base:18, icon:"🛡️" },
+  { id:"t1_arrow",  name:"弓手",     tier:1, atk_base:4, hp_base:8,  icon:"🏹" },
+  { id:"t1_healer", name:"僧侶",     tier:1, atk_base:2, hp_base:14, icon:"✨" },
+  { id:"t1_rogue",  name:"盗賊",     tier:1, atk_base:5, hp_base:7,  icon:"🗡️" },
+  // Tier 2
+  { id:"t2_knight", name:"騎士",     tier:2, atk_base:5, hp_base:22, icon:"🏇" },
+  { id:"t2_mage",   name:"魔道士",   tier:2, atk_base:7, hp_base:12, icon:"🔮" },
+  { id:"t2_ranger", name:"レンジャー",tier:2, atk_base:6, hp_base:14, icon:"🌿" },
+  { id:"t2_monk",   name:"武道家",   tier:2, atk_base:8, hp_base:10, icon:"🥋" },
+  // Tier 3
+  { id:"t3_paladin",name:"聖騎士",   tier:3, atk_base:8, hp_base:32, icon:"⚜️" },
+  { id:"t3_wizard", name:"魔法使い", tier:3, atk_base:12,hp_base:16, icon:"🌟" },
+  { id:"t3_hunter", name:"狩人",     tier:3, atk_base:10,hp_base:20, icon:"🦅" },
+  // Tier 4
+  { id:"t4_dragon", name:"竜騎士",   tier:4, atk_base:14,hp_base:38, icon:"🐉" },
+  { id:"t4_necro",  name:"死霊術師", tier:4, atk_base:16,hp_base:28, icon:"💀" },
+  // Tier 5
+  { id:"t5_god",    name:"神獣",     tier:5, atk_base:22,hp_base:60, icon:"🌈" },
+];
+
+const TIER_COLORS = ["","t1","t2","t3","t4","t5"];
+
+const SHOP_TIER_PROBS = {
+  1:  [[1,100]],
+  2:  [[1,80],[2,20]],
+  3:  [[1,60],[2,35],[3,5]],
+  4:  [[1,40],[2,40],[3,20]],
+  5:  [[1,25],[2,40],[3,30],[4,5]],
+  6:  [[1,15],[2,35],[3,35],[4,15]],
+  7:  [[1,10],[2,25],[3,35],[4,25],[5,5]],
+  8:  [[1,5],[2,15],[3,35],[4,30],[5,15]],
+  9:  [[2,10],[3,30],[4,35],[5,25]],
+  10: [[3,20],[4,40],[5,40]],
+};
+
+const ENEMY_TIER_PROBS = {
+  early:  [[1,70],[2,30]],     // 1-4
+  mid1:   [[1,40],[2,40],[3,20]],  // 5-9
+  mid2:   [[2,30],[3,50],[4,20]],  // 10-14
+  late:   [[3,30],[4,50],[5,20]],  // 15-20
+};
+
+const EXP_REQ = [0,4,6,8,10,12,14,16,18,20]; // idx = lv-1
+
+// ========== GAME STATE ==========
+let G = {};
+
+function newGame() {
+  G = {
+    round: 1,
+    gold: 10,
+    life: 3,
+    level: 1,
+    exp: 0,
+    phase: "prep",
+    board: Array(2).fill(null).map(()=>Array(3).fill(null)), // [row][col]
+    bench: Array(8).fill(null),
+    shop: Array(5).fill(null),
+    uid: 0,
+    selected: null, // {type:"board"|"bench", row?, col?, idx?}
+    battleLog: [],
+    battleSpeed: 400,
+    seed: Date.now(),
+    rng: null,
+  };
+  G.rng = makeRng(G.seed);
+  grantIncome();
+  refreshShop();
+  render();
+  addLog("system","ゲーム開始。Round 1 の準備フェーズです。");
+}
+
+function makeRng(seed) {
+  let s = seed;
+  return function() {
+    s ^= s << 13; s ^= s >> 17; s ^= s << 5;
+    return ((s >>> 0) / 4294967296);
+  };
+}
+
+function rnd(max) { return Math.floor(G.rng() * max); }
+
+function weightedPick(table) {
+  let total = table.reduce((a,b)=>a+b[1],0);
+  let r = G.rng() * total;
+  for (let [val, w] of table) { r -= w; if (r <= 0) return val; }
+  return table[table.length-1][0];
+}
+
+// ========== INCOME ==========
+function grantIncome() {
+  G.gold += 5;
+  // win bonus: we track in G.lastResult
+  if (G.lastResult === "win") G.gold += 1;
+}
+
+// ========== SHOP ==========
+function refreshShop() {
+  const probs = SHOP_TIER_PROBS[Math.min(G.level, 10)];
+  G.shop = Array(5).fill(null).map(() => {
+    const tier = weightedPick(probs);
+    const pool = UNITS_DATA.filter(u=>u.tier===tier);
+    return makeUnit(pool[rnd(pool.length)], 1);
+  });
+}
+
+function makeUnit(def, stars) {
+  const mult = stars===1?1:stars===2?1.5:2.0;
+  return {
+    uid: ++G.uid,
+    id: def.id,
+    name: def.name,
+    tier: def.tier,
+    icon: def.icon,
+    stars: stars,
+    atk: Math.max(1, Math.floor(def.atk_base * mult)),
+    hp: Math.max(1, Math.floor(def.hp_base * mult)),
+    maxHp: Math.max(1, Math.floor(def.hp_base * mult)),
+    atk_base: def.atk_base,
+    hp_base: def.hp_base,
+  };
+}
+
+function buyShop(idx) {
+  const unit = G.shop[idx];
+  if (!unit) return;
+  const cost = unit.tier;
+  if (G.gold < cost) { addLog("system","ゴールドが足りません"); return; }
+
+  // find place
+  let placed = false;
+  outer:
+  for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
+    if (!G.board[r][c]) { G.board[r][c] = {...unit}; placed=true; break outer; }
+  }
+  if (!placed) {
+    for (let i=0; i<8; i++) {
+      if (!G.bench[i]) { G.bench[i] = {...unit}; placed=true; break; }
+    }
+  }
+  if (!placed) { addLog("system","盤面とベンチが満杯です"); return; }
+
+  G.gold -= cost;
+  G.shop[idx] = null;
+  addLog("gold",`${unit.icon}${unit.name} を購入 (-${cost}G)`);
+  checkMerge();
+  render();
+}
+
+function reroll() {
+  if (G.gold < 1) { addLog("system","ゴールドが足りません"); return; }
+  G.gold -= 1;
+  refreshShop();
+  addLog("gold","ショップをリロール (-1G)");
+  render();
+}
+
+function buyExp(n) {
+  if (G.gold < n) { addLog("system","ゴールドが足りません"); return; }
+  if (G.level >= 10) { addLog("system","最大レベルです"); return; }
+  G.gold -= n; G.exp += n;
+  levelUpCheck();
+  addLog("gold",`EXP +${n} (-${n}G)`);
+  render();
+}
+
+function levelUpCheck() {
+  while (G.level < 10) {
+    const need = EXP_REQ[G.level-1];
+    if (need === 0 || G.exp < need) break;
+    G.exp -= need;
+    G.level++;
+    addLog("info",`レベルアップ！ Lv ${G.level}`);
+    refreshShop(); // new tier probs
+  }
+}
+
+// ========== SELL ==========
+function sellSelected() {
+  const sel = G.selected;
+  if (!sel) return;
+  let unit = null;
+  if (sel.type==="board") { unit = G.board[sel.row][sel.col]; G.board[sel.row][sel.col]=null; }
+  else { unit = G.bench[sel.idx]; G.bench[sel.idx]=null; }
+  if (!unit) { clearSel(); return; }
+  const val = unit.stars;
+  G.gold += val;
+  addLog("gold",`${unit.icon}${unit.name} を売却 (+${val}G)`);
+  clearSel();
+  render();
+}
+
+// ========== MERGE ==========
+function getAllUnits() {
+  let all = [];
+  for (let r=0; r<2; r++) for (let c=0; c<3; c++) if (G.board[r][c]) all.push({loc:"board",r,c,unit:G.board[r][c]});
+  for (let i=0; i<8; i++) if (G.bench[i]) all.push({loc:"bench",idx:i,unit:G.bench[i]});
+  return all;
+}
+
+function checkMerge() {
+  let merged = true;
+  while (merged) {
+    merged = false;
+    const all = getAllUnits();
+    // group by id+stars
+    const groups = {};
+    for (let e of all) {
+      const key = e.unit.id + "_" + e.unit.stars;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(e);
+    }
+    // find mergeable, sort by stars asc, then tier asc
+    let candidates = Object.entries(groups).filter(([k,v])=>v.length>=3 && v[0].unit.stars<3);
+    if (candidates.length===0) break;
+    candidates.sort((a,b)=>{
+      const u1=a[1][0].unit, u2=b[1][0].unit;
+      if (u1.stars!==u2.stars) return u1.stars-u2.stars;
+      return u1.tier-u2.tier;
+    });
+    const [key, group] = candidates[0];
+    const three = group.slice(0,3);
+    const newStars = three[0].unit.stars + 1;
+    const def = UNITS_DATA.find(u=>u.id===three[0].unit.id);
+    const newUnit = makeUnit(def, newStars);
+    // remove 3 originals
+    for (let e of three) {
+      if (e.loc==="board") G.board[e.r][e.c]=null;
+      else G.bench[e.idx]=null;
+    }
+    // place merged at first slot
+    const first = three[0];
+    if (first.loc==="board") G.board[first.r][first.c]=newUnit;
+    else G.bench[first.idx]=newUnit;
+    addLog("merge",`${newUnit.icon}${newUnit.name} が ★${newStars} に合成！`);
+    merged = true;
+  }
+}
+
+// ========== SELECTION / MOVE ==========
+function clearSel() {
+  G.selected = null;
+  document.getElementById("sell-hint-panel").style.display="none";
+  render();
+}
+
+function selectBoard(r, c) {
+  if (G.phase !== "prep") return;
+  const unit = G.board[r][c];
+  if (G.selected) {
+    const sel = G.selected;
+    // move to this cell
+    if (sel.type==="board" && sel.row===r && sel.col===c) { clearSel(); return; }
+    const fromUnit = sel.type==="board" ? G.board[sel.row][sel.col] : G.bench[sel.idx];
+    const toUnit = unit;
+    // swap
+    if (sel.type==="board") G.board[sel.row][sel.col]=toUnit;
+    else G.bench[sel.idx]=toUnit;
+    G.board[r][c]=fromUnit;
+    clearSel();
+    return;
+  }
+  if (!unit) return;
+  G.selected = {type:"board",row:r,col:c};
+  showSellHint(unit);
+  render();
+}
+
+function selectBench(idx) {
+  if (G.phase !== "prep") return;
+  const unit = G.bench[idx];
+  if (G.selected) {
+    const sel = G.selected;
+    if (sel.type==="bench" && sel.idx===idx) { clearSel(); return; }
+    const fromUnit = sel.type==="board" ? G.board[sel.row][sel.col] : G.bench[sel.idx];
+    const toUnit = unit;
+    if (sel.type==="board") G.board[sel.row][sel.col]=toUnit;
+    else G.bench[sel.idx]=toUnit;
+    G.bench[idx]=fromUnit;
+    clearSel();
+    return;
+  }
+  if (!unit) return;
+  G.selected = {type:"bench",idx};
+  showSellHint(unit);
+  render();
+}
+
+function showSellHint(unit) {
+  const p = document.getElementById("sell-hint-panel");
+  p.style.display="flex";
+  document.getElementById("sell-hint-text").textContent=`${unit.icon}${unit.name} ★${unit.stars} (売却: ${unit.stars}G)`;
+}
+
+// ========== BATTLE ==========
+let battleTimeout = null;
+let speedValues = [2000, 400, 150, 0];
+let speedLabels = ["遅い","普通","速い","即時"];
+
+function updateSpeed() {
+  const v = parseInt(document.getElementById("speed-slider").value);
+  G.battleSpeed = speedValues[v];
+  document.getElementById("speed-label").textContent = speedLabels[v];
+}
+
+function startBattle() {
+  if (G.phase !== "prep") return;
+  const playerUnits = getAllUnits().filter(e=>e.loc==="board").map(e=>e.unit);
+  if (playerUnits.length===0) { addLog("system","盤面にユニットがいません"); return; }
+  G.phase = "battle";
+  clearSel();
+
+  // Generate enemy
+  const enemy = generateEnemy();
+  G.enemyBoard = enemy;
+
+  // Deep copy boards for battle
+  const pBoard = G.board.map(row=>row.map(u=>u?{...u,curHp:u.maxHp}:null));
+  const eBoard = enemy.map(row=>row.map(u=>u?{...u,curHp:u.maxHp}:null));
+
+  document.getElementById("prep-view").classList.add("hidden");
+  document.getElementById("battle-view").classList.add("active");
+  document.getElementById("phase-badge").textContent="⚔️ 戦闘";
+  document.getElementById("phase-badge").className="phase-badge battle";
+
+  G.battleState = { pBoard, eBoard, turn:0, maxTurns:200, done:false };
+  addBattleLog("info","━━━ 戦闘開始 ━━━");
+  renderBattle();
+  runBattleStep();
+}
+
+function generateEnemy() {
+  const round = G.round;
+  let table;
+  if (round<=4) table=ENEMY_TIER_PROBS.early;
+  else if (round<=9) table=ENEMY_TIER_PROBS.mid1;
+  else if (round<=14) table=ENEMY_TIER_PROBS.mid2;
+  else table=ENEMY_TIER_PROBS.late;
+
+  const budget = 6 + round*2;
+  let spent = 0;
+  const units = [];
+  while (spent < budget) {
+    const tier = weightedPick(table);
+    if (spent + tier > budget) break;
+    const pool = UNITS_DATA.filter(u=>u.tier===tier);
+    const def = pool[rnd(pool.length)];
+    units.push(makeUnit(def,1));
+    spent += tier;
+    if (units.length>=6) break;
+  }
+
+  const board = [[null,null,null],[null,null,null]];
+  let placed=0;
+  for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
+    if (placed>=units.length) break;
+    board[r][c]=units[placed++];
+  }
+  return board;
+}
+
+function getBoardUnit(board, side) {
+  // side: "player" or "enemy"
+  // Returns {r,c,unit} of first alive unit by front->back, left->right
+  for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
+    const u = board[r][c];
+    if (u && u.curHp>0) return {r,c,u};
+  }
+  return null;
+}
+
+function getTarget(board) {
+  // front row first
+  for (let c=0; c<3; c++) { const u=board[0][c]; if (u&&u.curHp>0) return {r:0,c,u}; }
+  for (let c=0; c<3; c++) { const u=board[1][c]; if (u&&u.curHp>0) return {r:1,c,u}; }
+  return null;
+}
+
+function isDefeated(board) {
+  return !board.flat().some(u=>u&&u.curHp>0);
+}
+
+function runBattleStep() {
+  const bs = G.battleState;
+  if (bs.done) return;
+  if (bs.turn >= bs.maxTurns) {
+    bs.done=true;
+    addBattleLog("system","ターン上限に達しました（引き分け）");
+    endBattle("draw"); return;
+  }
+
+  // Player attacks
+  const pAtk = getBoardUnit(bs.pBoard,"player");
+  const eTarget = getTarget(bs.eBoard);
+  if (pAtk && eTarget) {
+    const dmg = pAtk.u.atk;
+    eTarget.u.curHp -= dmg;
+    addBattleLog("attack",`⚔ ${pAtk.u.icon}${pAtk.u.name}(味方) → ${eTarget.u.icon}${eTarget.u.name}(敵) -${dmg}HP`);
+    if (eTarget.u.curHp<=0) {
+      eTarget.u.curHp=0; bs.eBoard[eTarget.r][eTarget.c]=null;
+      addBattleLog("death",`💀 ${eTarget.u.icon}${eTarget.u.name}(敵) 撃破！`);
+    }
+  }
+  renderBattle();
+
+  if (isDefeated(bs.eBoard)) { bs.done=true; endBattle("win"); return; }
+  if (isDefeated(bs.pBoard)) { bs.done=true; endBattle("lose"); return; }
+
+  // Enemy attacks
+  const eAtk = getBoardUnit(bs.eBoard,"enemy");
+  const pTarget = getTarget(bs.pBoard);
+  if (eAtk && pTarget) {
+    const dmg = eAtk.u.atk;
+    pTarget.u.curHp -= dmg;
+    addBattleLog("attack",`🗡 ${eAtk.u.icon}${eAtk.u.name}(敵) → ${pTarget.u.icon}${pTarget.u.name}(味方) -${dmg}HP`);
+    if (pTarget.u.curHp<=0) {
+      pTarget.u.curHp=0; bs.pBoard[pTarget.r][pTarget.c]=null;
+      addBattleLog("death",`💔 ${pTarget.u.icon}${pTarget.u.name}(味方) 倒れた…`);
+    }
+  }
+  bs.turn++;
+  renderBattle();
+
+  if (isDefeated(bs.pBoard) && isDefeated(bs.eBoard)) { bs.done=true; endBattle("win"); return; }
+  if (isDefeated(bs.pBoard)) { bs.done=true; endBattle("lose"); return; }
+  if (isDefeated(bs.eBoard)) { bs.done=true; endBattle("win"); return; }
+
+  const speed = G.battleSpeed;
+  if (speed===0) { runBattleStep(); }
+  else { battleTimeout = setTimeout(runBattleStep, speed); }
+}
+
+function endBattle(result) {
+  setTimeout(()=>{
+    if (result==="win") {
+      G.gold += 3; G.exp += 1;
+      G.lastResult = "win";
+      addBattleLog("win","🏆 勝利！ +3G +1EXP");
+      levelUpCheck();
+      showModal("win","勝利！",`+3G / +1EXP を獲得`);
+    } else if (result==="lose") {
+      const dmg = 1 + Math.floor(G.round/5);
+      G.life -= dmg;
+      G.lastResult = "lose";
+      addBattleLog("lose",`😞 敗北… Life -${dmg} (残り: ${G.life})`);
+      if (G.life<=0) {
+        showModal("lose","ゲームオーバー",`Round ${G.round} で力尽きた…`);
+        return;
+      }
+      showModal("lose","敗北",`Life -${dmg} → 残り ${G.life}`);
+    } else {
+      G.lastResult = "draw";
+      addBattleLog("system","引き分け");
+      showModal("","引き分け","両軍同時撃破");
+    }
+  }, 300);
+}
+
+function afterBattle() {
+  if (G.life<=0) { newGame(); return; }
+  if (G.round>=20) { showModal("win","クリア！",`全20ラウンドを突破！`); return; }
+  G.round++;
+  G.phase="prep";
+  document.getElementById("prep-view").classList.remove("hidden");
+  document.getElementById("battle-view").classList.remove("active");
+  document.getElementById("phase-badge").textContent="準備";
+  document.getElementById("phase-badge").className="phase-badge prep";
+  document.getElementById("battle-log-box").innerHTML="";
+  grantIncome();
+  refreshShop();
+  render();
+  addLog("info",`━━━ Round ${G.round} 開始 ━━━`);
+  addLog("gold",`収入: Gold → ${G.gold}`);
+}
+
+// ========== MODAL ==========
+function showModal(type, title, body) {
+  document.getElementById("modal-title").textContent=title;
+  document.getElementById("modal-body").textContent=body;
+  const box = document.getElementById("modal-box");
+  box.className="modal "+(type==="win"?"win":type==="lose"?"lose":"");
+  document.getElementById("modal").style.display="flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display="none";
+  if (G.life<=0) { newGame(); return; }
+  if (G.round>=20 && G.lastResult==="win") { newGame(); return; }
+  afterBattle();
+}
+
+// ========== RENDER ==========
+function render() {
+  renderStatBar();
+  renderPlayerBoard();
+  renderBench();
+  renderShop();
+  renderExpBar();
+}
+
+function renderStatBar() {
+  document.getElementById("stat-round").textContent=G.round;
+  document.getElementById("stat-gold").textContent=G.gold;
+  document.getElementById("stat-life").textContent=G.life;
+  document.getElementById("stat-lv").textContent=G.level;
+}
+
+function renderPlayerBoard() {
+  renderBoardGrid("player-board", G.board, 0, "front", (r,c)=>selectBoard(r,c));
+  renderBoardGrid("player-back",  G.board, 1, "back",  (r,c)=>selectBoard(r,c));
+}
+
+function renderBoardGrid(id, board, row, cls, onClick) {
+  const el = document.getElementById(id);
+  el.innerHTML="";
+  for (let c=0; c<3; c++) {
+    const unit = board[row][c];
+    const cell = document.createElement("div");
+    cell.className="cell "+cls+(unit?"":" empty");
+    if (G.selected && G.selected.type==="board" && G.selected.row===row && G.selected.col===c) cell.classList.add("selected");
+    if (unit) cell.innerHTML=unitHtml(unit);
+    cell.onclick=()=>onClick(row,c);
+    el.appendChild(cell);
+  }
+}
+
+function renderBench() {
+  const el = document.getElementById("bench");
+  el.innerHTML="";
+  for (let i=0; i<8; i++) {
+    const unit = G.bench[i];
+    const cell = document.createElement("div");
+    cell.className="bench-cell"+(unit?"":" empty");
+    if (G.selected && G.selected.type==="bench" && G.selected.idx===i) cell.classList.add("selected");
+    if (unit) cell.innerHTML=unitHtml(unit, true);
+    cell.onclick=()=>selectBench(i);
+    el.appendChild(cell);
+  }
+}
+
+function renderShop() {
+  const el = document.getElementById("shop");
+  el.innerHTML="";
+  G.shop.forEach((unit,idx)=>{
+    const card=document.createElement("div");
+    if (!unit) { card.className="shop-card sold"; card.innerHTML="<span style='color:#444'>売切</span>"; el.appendChild(card); return; }
+    const cost=unit.tier;
+    card.className="shop-card"+(G.gold<cost?" cant-afford":"");
+    card.innerHTML=`
+      <div class="shop-icon">${unit.icon}</div>
+      <div class="shop-name">${unit.name}</div>
+      <div class="tier-badge ${TIER_COLORS[unit.tier]}">T${unit.tier}</div>
+      <div class="shop-cost">${cost}G</div>
+    `;
+    card.onclick=()=>buyShop(idx);
+    el.appendChild(card);
+  });
+}
+
+function renderExpBar() {
+  const need = G.level>=10 ? 0 : EXP_REQ[G.level-1];
+  const pct = need===0 ? 100 : Math.min(100,(G.exp/need)*100);
+  document.getElementById("exp-fill").style.width=pct+"%";
+  document.getElementById("exp-info").textContent = G.level>=10 ? "MAX LEVEL" : `EXP: ${G.exp}/${need} (Lv${G.level}→${G.level+1})`;
+}
+
+function unitHtml(unit, small=false) {
+  const stars = "★".repeat(unit.stars);
+  const starClass = "star"+unit.stars;
+  const hpPct = unit.curHp!=null ? (unit.curHp/unit.maxHp)*100 : 100;
+  const hpDisplay = unit.curHp!=null ? unit.curHp : unit.hp;
+  return `<div class="unit-in-cell">
+    <div class="tier-badge ${TIER_COLORS[unit.tier]}">T${unit.tier}</div>
+    <div class="unit-icon">${unit.icon}</div>
+    ${!small?`<div class="unit-name-cell">${unit.name}</div>`:""}
+    <div class="unit-stars ${starClass}">${stars}</div>
+    ${!small?`<div style="font-size:9px;color:var(--text-dim)">⚔${unit.atk} ❤${hpDisplay}</div>`:""}
+    <div class="unit-hp-bar"><div class="unit-hp-fill" style="width:${hpPct}%"></div></div>
+  </div>`;
+}
+
+// ========== BATTLE RENDER ==========
+function renderBattle() {
+  const bs = G.battleState;
+  renderBattleBoard("battle-player-front", bs.pBoard, 0, "front");
+  renderBattleBoard("battle-player-back",  bs.pBoard, 1, "back");
+  renderBattleBoard("battle-enemy-front",  bs.eBoard, 0, "enemy-front");
+  renderBattleBoard("battle-enemy-back",   bs.eBoard, 1, "enemy-back");
+}
+
+function renderBattleBoard(id, board, row, cls) {
+  const el = document.getElementById(id);
+  el.innerHTML="";
+  for (let c=0; c<3; c++) {
+    const unit=board[row][c];
+    const cell=document.createElement("div");
+    cell.className="cell "+cls+(unit&&unit.curHp>0?"":" empty");
+    if (unit&&unit.curHp>0) cell.innerHTML=unitHtml(unit);
+    el.appendChild(cell);
+  }
+}
+
+// ========== LOG ==========
+function addLog(type, msg) {
+  const box = document.getElementById("log-box");
+  const entry = document.createElement("div");
+  entry.className="log-entry "+type;
+  entry.textContent="> "+msg;
+  box.appendChild(entry);
+  box.scrollTop=box.scrollHeight;
+}
+
+function addBattleLog(type, msg) {
+  const box = document.getElementById("battle-log-box");
+  const entry = document.createElement("div");
+  entry.className="log-entry "+type;
+  entry.textContent="> "+msg;
+  box.appendChild(entry);
+  box.scrollTop=box.scrollHeight;
+}
+
+// ========== INIT ==========
+newGame();
+</script>
+</body>
+</html>
