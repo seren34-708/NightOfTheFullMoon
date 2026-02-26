@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>鏡の中の記憶 - Auto Battler</title>
+<title>Battle of Memories</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Shippori+Mincho:wght@400;700&display=swap');
 
@@ -486,18 +486,380 @@
   }
   .speed-label { font-size: 11px; color: var(--text-dim); }
   input[type=range] { accent-color: var(--accent); }
+
+  .audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .audio-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .audio-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .audio-btn.muted { opacity: 0.35; }
+  .vol-slider { accent-color: var(--accent2); width: 64px; }
+
+  /* ===== TITLE SCREEN ===== */
+  #title-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 30% 40%, rgba(106,127,255,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 60%, rgba(167,139,250,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 80%, rgba(107,255,158,0.05) 0%, transparent 50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    gap: 0;
+  }
+  #title-screen.hidden { display: none; }
+
+  .title-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float-up linear infinite;
+    opacity: 0;
+  }
+  @keyframes float-up {
+    0%   { transform: translateY(0) scale(1);   opacity: 0; }
+    10%  { opacity: 0.6; }
+    80%  { opacity: 0.3; }
+    100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+  }
+
+  .title-logo-wrap {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .title-sub {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12px;
+    letter-spacing: 0.5em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    animation: fade-in 1.2s ease both;
+  }
+  .title-main {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(32px, 8vw, 64px);
+    letter-spacing: 0.08em;
+    background: linear-gradient(135deg, #a78bfa, #6a7fff, #6bff9e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    line-height: 1.1;
+    animation: fade-in 1s ease 0.3s both;
+  }
+  .title-tagline {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-top: 14px;
+    animation: fade-in 1s ease 0.7s both;
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .title-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 260px;
+    animation: fade-in 1s ease 1s both;
+  }
+  .title-btn {
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 10px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .title-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .title-btn:hover::after { opacity: 1; }
+  .title-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .title-btn-primary {
+    background: linear-gradient(135deg, #6a7fff, #a78bfa);
+    color: white;
+  }
+  .title-btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border) !important;
+  }
+  .title-btn-secondary:hover { color: var(--text); border-color: var(--accent2) !important; }
+
+  .title-version {
+    position: absolute;
+    bottom: 20px;
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== HOW TO PLAY SCREEN ===== */
+  #howto-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,15,0.97);
+    z-index: 210;
+    overflow-y: auto;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 40px;
+  }
+  #howto-screen.active { display: flex; }
+
+  .howto-box {
+    max-width: 560px;
+    width: 100%;
+    animation: fade-in 0.3s ease both;
+  }
+  .howto-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .howto-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 22px;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+  }
+  .howto-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .howto-close:hover { border-color: var(--accent2); color: var(--text); }
+
+  .howto-section {
+    margin-bottom: 24px;
+  }
+  .howto-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+  .howto-text {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.9;
+    padding-left: 13px;
+  }
+  .howto-text strong { color: var(--text); }
+  .howto-tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 0 2px;
+  }
+  .tag-gold { background: rgba(245,200,66,0.15); color: var(--gold); border: 1px solid rgba(245,200,66,0.3); }
+  .tag-green { background: rgba(107,255,158,0.12); color: var(--green); border: 1px solid rgba(107,255,158,0.25); }
+  .tag-red { background: rgba(255,107,107,0.12); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
+  .tag-blue { background: rgba(106,127,255,0.12); color: var(--accent); border: 1px solid rgba(106,127,255,0.25); }
+  .tag-purple { background: rgba(167,139,250,0.12); color: var(--accent2); border: 1px solid rgba(167,139,250,0.25); }
+  .howto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-left: 13px;
+    margin-top: 4px;
+  }
+  .howto-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .howto-card strong { color: var(--text); display: block; margin-bottom: 3px; font-size: 13px; }
+  .howto-start-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6a7fff, #a78bfa);
+    border: none;
+    color: white;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .howto-start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 </style>
 </head>
 <body>
-<div id="app">
+<!-- ===== TITLE SCREEN ===== -->
+<div id="title-screen">
+  <div class="title-particles" id="particles"></div>
+  <div class="title-logo-wrap">
+    <div class="title-sub">Auto Battler</div>
+    <div class="title-main">Battle of<br>Memories</div>
+    <div class="title-tagline">— 記憶の欠片を集め、最強の陣を築け —</div>
+  </div>
+  <div class="title-buttons">
+    <button class="title-btn title-btn-primary" onclick="startGame()">⚔️ &nbsp; Start Battle</button>
+    <button class="title-btn title-btn-secondary" onclick="showHowTo()">📖 &nbsp; How to Play</button>
+  </div>
+  <div class="title-version">v1.0 MVP</div>
+</div>
+
+<!-- ===== HOW TO PLAY SCREEN ===== -->
+<div id="howto-screen">
+  <div class="howto-box">
+    <div class="howto-header">
+      <div class="howto-title">📖 How to Play</div>
+      <button class="howto-close" onclick="closeHowTo()">← 戻る</button>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">🎯 ゲームの目的</div>
+      <div class="howto-text">
+        全 <strong>20ラウンド</strong> を生き残れ！<br>
+        ショップでユニットを購入して盤面に配置し、自動で行われる戦闘に勝利し続けよう。<br>
+        <span class="howto-tag tag-red">❤ Life</span> が <strong>0</strong> になるとゲームオーバー。
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">🔄 ラウンドの流れ</div>
+      <div class="howto-text">
+        各ラウンドは <strong>準備フェーズ → 戦闘フェーズ → 結果</strong> の順に進む。<br><br>
+        <strong>① 準備フェーズ</strong><br>
+        ・ラウンド開始時に <span class="howto-tag tag-gold">💰 5G</span>（勝利中は+1G）を受け取る<br>
+        ・ショップでユニットを購入し、盤面に配置する<br>
+        ・準備ができたら「⚔️ 戦闘開始」ボタンを押す<br><br>
+        <strong>② 戦闘フェーズ（自動）</strong><br>
+        ・味方と敵が交互に攻撃し、全滅した側が負け<br>
+        ・プレイヤーは操作不要。速度スライダーで観戦ペースを調整できる<br><br>
+        <strong>③ 結果</strong><br>
+        ・<span class="howto-tag tag-green">勝利</span> → <span class="howto-tag tag-gold">+3G</span> <span class="howto-tag tag-green">+1EXP</span> を獲得<br>
+        ・<span class="howto-tag tag-red">敗北</span> → ラウンドに応じた <span class="howto-tag tag-red">Life ダメージ</span>（R1-4: -1、R5-9: -2…）
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">🛒 ショップ</div>
+      <div class="howto-text">
+        ショップには毎ラウンド5体のユニットが並ぶ。コストはTierと同じ金額。
+      </div>
+      <div class="howto-grid" style="margin-top:8px">
+        <div class="howto-card"><strong>購入</strong>ユニットをクリックして購入。盤面が満杯ならベンチへ</div>
+        <div class="howto-card"><strong>🎲 リロール（1G）</strong>ショップのラインナップを全て入れ替える</div>
+        <div class="howto-card"><strong>⬆️ EXP購入（1G）</strong>1Gで EXP+1。レベルが上がると高Tierが出やすくなる</div>
+        <div class="howto-card"><strong>売却</strong>ユニット選択後「売却」ボタン。★の数だけGoldが戻る</div>
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">⭐ 合成システム</div>
+      <div class="howto-text">
+        <strong>同じユニットを3体</strong>集めると自動的に合成されて <span class="howto-tag tag-purple">★アップ</span>！<br>
+        ★1 × 3体 → ★2（ATK/HP ×1.5）<br>
+        ★2 × 3体 → ★3（ATK/HP ×2.0）<br>
+        合成は盤面・ベンチをまたいで発動。さらに連鎖合成も可能！
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">📋 盤面・ベンチ</div>
+      <div class="howto-text">
+        盤面は <strong>3×2マス（Front列・Back列）</strong>、ベンチは最大8枠。<br>
+        Front列のユニットが先に攻撃対象になる。タンクはFrontに！<br><br>
+        <strong>ユニットの移動：</strong>ユニットをクリックして選択 → 移動先をクリック（スワップ可）
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">🎖 Tierとレベル</div>
+      <div class="howto-text">
+        ユニットには <strong>Tier 1〜5</strong> があり、高Tierほど強力。<br>
+        プレイヤーレベルが上がるほどショップに高Tierが出現しやすくなる。<br>
+        レベルアップは EXP購入か、戦闘勝利（+1EXP）で貯めよう。
+      </div>
+      <div class="howto-grid" style="margin-top:8px">
+        <div class="howto-card"><strong style="color:var(--t1)">■ Tier 1</strong>コスト1G。序盤の基本戦力</div>
+        <div class="howto-card"><strong style="color:var(--t2)">■ Tier 2</strong>コスト2G。中盤から活躍</div>
+        <div class="howto-card"><strong style="color:var(--t3)">■ Tier 3</strong>コスト3G。かなり強力</div>
+        <div class="howto-card"><strong style="color:var(--t4)">■ Tier 4</strong>コスト4G。終盤の主力</div>
+        <div class="howto-card" style="grid-column:span 2"><strong style="color:var(--t5)">■ Tier 5</strong>コスト5G。最強クラス。高レベル帯でのみ出現</div>
+      </div>
+    </div>
+
+    <button class="howto-start-btn" onclick="startGameFromHowTo()">⚔️ さっそく始める</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
   <div class="header">
-    <div class="game-title">鏡の中の記憶</div>
+    <div class="game-title">Battle of Memories</div>
     <div class="stats-bar">
       <div class="stat"><span class="stat-label">Round</span><span class="stat-val round" id="stat-round">1</span></div>
       <div class="stat"><span class="stat-label">💰</span><span class="stat-val gold" id="stat-gold">10</span></div>
       <div class="stat"><span class="stat-label">❤️</span><span class="stat-val life" id="stat-life">3</span></div>
       <div class="stat"><span class="stat-label">Lv</span><span class="stat-val" id="stat-lv">1</span></div>
       <div class="stat" id="phase-badge-wrap"><span class="phase-badge prep" id="phase-badge">準備</span></div>
+    </div>
+    <div class="audio-controls">
+      <button class="audio-btn" id="mute-btn" onclick="toggleMute()" title="ミュート">🔊</button>
+      <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" oninput="setVolume(this.value)" title="音量">
     </div>
   </div>
 
@@ -527,12 +889,12 @@
           <span id="sell-hint-text">選択中: -</span>
           <button class="btn btn-red" onclick="sellSelected()">売却</button>
         </div>
-        <!-- Back row shown first (farther from player = top visually in prep) -->
-        <div class="board-label">Back Row（後列）</div>
-        <div class="board-grid" id="player-back"></div>
-        <div style="height:8px"></div>
+        <!-- Front row on top, Back row below -->
         <div class="board-label">Front Row（前列）</div>
         <div class="board-grid" id="player-board"></div>
+        <div style="height:8px"></div>
+        <div class="board-label">Back Row（後列）</div>
+        <div class="board-grid" id="player-back"></div>
       </div>
 
       <!-- BENCH -->
@@ -567,12 +929,12 @@
         <div class="battle-divider">⚔ ── VS ── ⚔</div>
         <!-- PLAYER: bottom -->
         <div>
+          <div class="battle-side-label player" style="margin-bottom:6px">🛡 味方</div>
           <div class="board-label">Front</div>
           <div class="board-grid" id="battle-player-front"></div>
           <div style="height:6px"></div>
           <div class="board-label">Back</div>
           <div class="board-grid" id="battle-player-back"></div>
-          <div class="battle-side-label player" style="margin-top:6px">🛡 味方</div>
         </div>
       </div>
       <div class="battle-speed-row">
@@ -644,7 +1006,7 @@ const ENEMY_TIER_PROBS = {
   late:   [[3,30],[4,50],[5,20]],  // 15-20
 };
 
-const EXP_REQ = [0,4,6,8,10,12,14,16,18,20]; // idx = lv-1
+const EXP_REQ = [4,6,8,10,12,14,16,18,20,0]; // idx = lv-1, Lv1→2:4, ..., Lv10:0(max)
 
 // ========== GAME STATE ==========
 let G = {};
@@ -747,6 +1109,7 @@ function buyShop(idx) {
   G.gold -= cost;
   G.shop[idx] = null;
   addLog("gold",`${unit.icon}${unit.name} を購入 (-${cost}G)`);
+  Audio.playBuy();
   checkMerge();
   render();
 }
@@ -775,7 +1138,7 @@ function levelUpCheck() {
     G.exp -= need;
     G.level++;
     addLog("info",`レベルアップ！ Lv ${G.level}`);
-    refreshShop(); // new tier probs
+    refreshShop();
   }
 }
 
@@ -929,6 +1292,7 @@ function startBattle() {
 
   G.battleState = { pBoard, eBoard, turn:0, maxTurns:200, done:false };
   addBattleLog("info","━━━ 戦闘開始 ━━━");
+  Audio.playBgm('battle');
   renderBattle();
   runBattleStep();
 }
@@ -1035,18 +1399,21 @@ function runBattleStep() {
 }
 
 function endBattle(result) {
+  Audio.stopBgm();
   setTimeout(()=>{
     if (result==="win") {
       G.gold += 3; G.exp += 1;
       G.lastResult = "win";
       addBattleLog("win","🏆 勝利！ +3G +1EXP");
       levelUpCheck();
-      showModal("win","勝利！",`+3G / +1EXP を獲得`);
+      Audio.playWin();
+      showModal("win","勝利！",`+3G / +1EXP を獲得　❤ Life: ${G.life}`);
     } else if (result==="lose") {
       const dmg = 1 + Math.floor(G.round/5);
       G.life -= dmg;
       G.lastResult = "lose";
       addBattleLog("lose",`😞 敗北… Life -${dmg} (残り: ${G.life})`);
+      Audio.playLose();
       if (G.life<=0) {
         showModal("lose","ゲームオーバー",`Round ${G.round} で力尽きた…`);
         return;
@@ -1055,15 +1422,18 @@ function endBattle(result) {
     } else {
       G.lastResult = "draw";
       addBattleLog("system","引き分け");
-      showModal("","引き分け","両軍同時撃破");
+      showModal("","引き分け",`両軍同時撃破　❤ Life: ${G.life}`);
     }
   }, 300);
 }
 
 function afterBattle() {
   if (G.life<=0) { newGame(); return; }
-  if (G.round>=20) { showModal("win","クリア！",`全20ラウンドを突破！`); return; }
-  G.round++;
+  if (G.round>=20 && G.lastResult==="win") { showModal("win","クリア！",`全20ラウンドを突破！`); return; }
+  // ラウンドを進めるのは勝利・引き分け時のみ
+  if (G.lastResult === "win" || G.lastResult === "draw") {
+    if (G.round < 20) G.round++;
+  }
   G.phase="prep";
   document.getElementById("prep-view").classList.remove("hidden");
   document.getElementById("battle-view").classList.remove("active");
@@ -1075,6 +1445,7 @@ function afterBattle() {
   render();
   addLog("info",`━━━ Round ${G.round} 開始 ━━━`);
   addLog("gold",`収入: Gold → ${G.gold}`);
+  Audio.playBgm('prep');
 }
 
 // ========== MODAL ==========
@@ -1088,9 +1459,18 @@ function showModal(type, title, body) {
 
 function closeModal() {
   document.getElementById("modal").style.display="none";
-  if (G.life<=0) { newGame(); return; }
-  if (G.round>=20 && G.lastResult==="win") { newGame(); return; }
+  if (G.life<=0) { returnToTitle(); return; }
+  if (G.round>=20 && G.lastResult==="win") { returnToTitle(); return; }
   afterBattle();
+}
+
+function returnToTitle() {
+  Audio.stopBgm();
+  document.getElementById('app').style.display='none';
+  document.getElementById('title-screen').classList.remove('hidden');
+  document.getElementById('prep-view').classList.remove('hidden');
+  document.getElementById('battle-view').classList.remove('active');
+  Audio.playBgm('title');
 }
 
 // ========== RENDER ==========
@@ -1223,8 +1603,563 @@ function addBattleLog(type, msg) {
   box.scrollTop=box.scrollHeight;
 }
 
+// ========== AUDIO ENGINE ==========
+const Audio = (() => {
+  let ctx = null;
+  let masterGain = null;
+  let bgmGain = null;
+  let sfxGain = null;
+  let muted = false;
+  let volume = 0.6;
+  let currentBgm = null; // { nodes, stop }
+  let currentBgmName = null;
+
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = volume;
+    masterGain.connect(ctx.destination);
+    bgmGain = ctx.createGain();
+    bgmGain.gain.value = 0.45;
+    bgmGain.connect(masterGain);
+    sfxGain = ctx.createGain();
+    sfxGain.gain.value = 1.0;
+    sfxGain.connect(masterGain);
+  }
+
+  function resume() { if (ctx && ctx.state === 'suspended') ctx.resume(); }
+
+  // --- Low-level helpers ---
+  function osc(freq, type, gainVal, start, end, dest) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = gainVal;
+    o.connect(g); g.connect(dest);
+    o.start(start); o.stop(end);
+    return o;
+  }
+
+  function rampGain(gNode, from, to, t0, t1) {
+    gNode.gain.setValueAtTime(from, t0);
+    gNode.gain.linearRampToValueAtTime(to, t1);
+  }
+
+  // --- BGM: 準備フェーズ (ambient, mystical, slow arpeggio) ---
+  function buildPrepBgm() {
+    init(); resume();
+    const nodes = [];
+    // Scale: D minor pentatonic: D3 F3 G3 A3 C4 D4 F4 A4
+    const scale = [146.83, 174.61, 196.00, 220.00, 261.63, 293.66, 349.23, 440.00];
+    const arpPattern = [0, 2, 4, 2, 1, 3, 5, 3, 0, 4, 6, 4, 2, 5, 7, 5];
+    const bpm = 72;
+    const step = 60 / bpm / 2; // 8th note
+    const totalBars = 16;
+    const loopDur = step * arpPattern.length;
+
+    // Pad: slow evolving chords
+    const padFreqs = [[146.83, 174.61, 220.00], [130.81, 164.81, 196.00]];
+    let padLoop;
+    const schedulePad = (startTime) => {
+      for (let b = 0; b < 4; b++) {
+        const chord = padFreqs[b % 2];
+        for (const f of chord) {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = f;
+          const t = startTime + b * loopDur / 4;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.08, t + 0.4);
+          g.gain.linearRampToValueAtTime(0.06, t + loopDur / 4 - 0.1);
+          g.gain.linearRampToValueAtTime(0, t + loopDur / 4);
+          o.connect(g); g.connect(bgmGain);
+          o.start(t); o.stop(t + loopDur / 4 + 0.1);
+          nodes.push(o);
+        }
+      }
+    };
+
+    // Arp melody
+    const scheduleArp = (startTime) => {
+      for (let i = 0; i < arpPattern.length; i++) {
+        const freq = scale[arpPattern[i]];
+        const t = startTime + i * step;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.12, t + 0.02);
+        g.gain.linearRampToValueAtTime(0, t + step * 0.85);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + step);
+        nodes.push(o);
+      }
+    };
+
+    // Bass pulse
+    const scheduleBass = (startTime) => {
+      const bassNotes = [73.42, 87.31, 98.00, 87.31]; // D2 F2 G2 F2
+      for (let i = 0; i < 4; i++) {
+        const t = startTime + i * (loopDur / 4);
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.value = bassNotes[i];
+        g.gain.setValueAtTime(0.06, t);
+        g.gain.linearRampToValueAtTime(0.02, t + loopDur / 4 - 0.05);
+        g.gain.setValueAtTime(0, t + loopDur / 4);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + loopDur / 4 + 0.05);
+        nodes.push(o);
+      }
+    };
+
+    // Loop scheduling
+    let nextLoop = ctx.currentTime + 0.05;
+    let loopTimer;
+    const schedule = () => {
+      schedulePad(nextLoop);
+      scheduleArp(nextLoop);
+      scheduleBass(nextLoop);
+      nextLoop += loopDur;
+      loopTimer = setTimeout(schedule, (loopDur - 0.5) * 1000);
+    };
+    schedule();
+
+    return {
+      stop() {
+        clearTimeout(loopTimer);
+        nodes.forEach(n => { try { n.stop(); } catch(e){} });
+      }
+    };
+  }
+
+  // --- BGM: 戦闘フェーズ (tense, driving, minor key) ---
+  function buildBattleBgm() {
+    init(); resume();
+    const nodes = [];
+    const bpm = 140;
+    const beat = 60 / bpm;
+    const bar = beat * 4;
+
+    // Motif: E minor  E3 G3 B3 D4
+    const motif = [
+      [164.81, beat/2], [196.00, beat/2], [246.94, beat/2], [293.66, beat/2],
+      [246.94, beat/2], [196.00, beat/4], [164.81, beat/4],
+      [146.83, beat],   [164.81, beat],
+    ];
+    const motifDur = motif.reduce((s,[,d])=>s+d, 0);
+
+    // Driving bass: 8th note pulse on E2/B2
+    const bassPattern = [82.41, 82.41, 123.47, 82.41, 82.41, 123.47, 82.41, 82.41];
+    const schedBass = (t0) => {
+      for (let i = 0; i < bassPattern.length; i++) {
+        const t = t0 + i * beat/2;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.value = bassPattern[i];
+        g.gain.setValueAtTime(0.09, t);
+        g.gain.linearRampToValueAtTime(0.03, t + beat/2 - 0.02);
+        g.gain.setValueAtTime(0, t + beat/2);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + beat/2 + 0.02);
+        nodes.push(o);
+      }
+    };
+
+    // Melody motif
+    const schedMotif = (t0) => {
+      let t = t0;
+      for (const [freq, dur] of motif) {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'square';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.07, t + 0.015);
+        g.gain.linearRampToValueAtTime(0.04, t + dur - 0.03);
+        g.gain.setValueAtTime(0, t + dur);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + dur + 0.02);
+        nodes.push(o);
+        t += dur;
+      }
+    };
+
+    // Percussion-like noise bursts on beats
+    const schedPerc = (t0) => {
+      const hits = [0, beat, beat*2, beat*3, beat*1.5, beat*2.5];
+      for (const offset of hits) {
+        const t = t0 + offset;
+        const bufSize = ctx.sampleRate * 0.08;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i/bufSize);
+        const src = ctx.createBufferSource();
+        const filt = ctx.createBiquadFilter();
+        const g = ctx.createGain();
+        src.buffer = buf;
+        filt.type = 'bandpass';
+        filt.frequency.value = offset === 0 || offset === beat*2 ? 200 : 800;
+        filt.Q.value = 0.8;
+        g.gain.value = 0.18;
+        src.connect(filt); filt.connect(g); g.connect(bgmGain);
+        src.start(t);
+        nodes.push(src);
+      }
+    };
+
+    const loopDur = Math.max(bar, motifDur);
+    let nextLoop = ctx.currentTime + 0.05;
+    let loopTimer;
+    const schedule = () => {
+      schedBass(nextLoop);
+      schedMotif(nextLoop);
+      schedPerc(nextLoop);
+      nextLoop += loopDur;
+      loopTimer = setTimeout(schedule, (loopDur - 0.4) * 1000);
+    };
+    schedule();
+
+    return {
+      stop() {
+        clearTimeout(loopTimer);
+        nodes.forEach(n => { try { n.stop(); } catch(e){} });
+      }
+    };
+  }
+
+  // --- BGM: タイトル画面 (壮大・神秘的・ゆったりしたオーケストラ風) ---
+  function buildTitleBgm() {
+    init(); resume();
+    const nodes = [];
+    // A minor: A C E G  →  Am - F - C - G progression
+    const chordProg = [
+      [220.00, 261.63, 329.63, 392.00], // Am
+      [174.61, 220.00, 261.63, 349.23], // F
+      [261.63, 329.63, 392.00, 523.25], // C
+      [196.00, 246.94, 293.66, 392.00], // G
+    ];
+    const chordDur = 3.0;
+    const loopDur = chordDur * chordProg.length;
+
+    // Lush string-pad chords
+    const schedChords = (t0) => {
+      chordProg.forEach((chord, ci) => {
+        const t = t0 + ci * chordDur;
+        chord.forEach(freq => {
+          // Slightly detune two oscillators for chorus effect
+          [-4, 0, 4].forEach(detune => {
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'sawtooth';
+            o.frequency.value = freq;
+            o.detune.value = detune;
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.028, t + 0.6);
+            g.gain.linearRampToValueAtTime(0.022, t + chordDur - 0.3);
+            g.gain.linearRampToValueAtTime(0, t + chordDur);
+            // Soft low-pass filter for warmth
+            const filt = ctx.createBiquadFilter();
+            filt.type = 'lowpass';
+            filt.frequency.value = 1200;
+            filt.Q.value = 0.7;
+            o.connect(filt); filt.connect(g); g.connect(bgmGain);
+            o.start(t); o.stop(t + chordDur + 0.1);
+            nodes.push(o);
+          });
+        });
+      });
+    };
+
+    // Majestic melody: stepwise motion over Am scale
+    const melodyNotes = [
+      [440.00, 0.75],   // A4
+      [493.88, 0.75],   // B4
+      [523.25, 1.50],   // C5
+      [493.88, 0.75],   // B4
+      [440.00, 0.75],   // A4
+      [392.00, 1.50],   // G4
+      [349.23, 0.75],   // F4
+      [392.00, 0.75],   // G4
+      [440.00, 3.00],   // A4 (held)
+      [349.23, 0.75],   // F4
+      [392.00, 0.75],   // G4
+      [440.00, 0.75],   // A4
+      [523.25, 0.75],   // C5
+      [587.33, 1.50],   // D5
+      [523.25, 1.50],   // C5
+      [493.88, 3.00],   // B4 (held)
+    ];
+    const schedMelody = (t0) => {
+      let t = t0;
+      for (const [freq, dur] of melodyNotes) {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.10, t + 0.08);
+        g.gain.linearRampToValueAtTime(0.07, t + dur - 0.1);
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + dur + 0.05);
+        nodes.push(o);
+        t += dur;
+      }
+    };
+
+    // Deep bass pulse: root notes every chord
+    const bassNotes = [110.00, 87.31, 130.81, 98.00]; // A2 F2 C3 G2
+    const schedBass = (t0) => {
+      bassNotes.forEach((freq, i) => {
+        const t = t0 + i * chordDur;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.linearRampToValueAtTime(0.05, t + chordDur - 0.2);
+        g.gain.linearRampToValueAtTime(0, t + chordDur);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + chordDur + 0.05);
+        nodes.push(o);
+      });
+    };
+
+    // Shimmer high overtones (bell-like)
+    const shimmerFreqs = [1318.5, 1567.98, 1760.00, 2093.00];
+    const schedShimmer = (t0) => {
+      shimmerFreqs.forEach((freq, i) => {
+        const t = t0 + i * (loopDur / shimmerFreqs.length) + Math.random() * 1.5;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.04, t + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + 2.6);
+        nodes.push(o);
+      });
+    };
+
+    let nextLoop = ctx.currentTime + 0.05;
+    let loopTimer;
+    const schedule = () => {
+      schedChords(nextLoop);
+      schedMelody(nextLoop);
+      schedBass(nextLoop);
+      schedShimmer(nextLoop);
+      nextLoop += loopDur;
+      loopTimer = setTimeout(schedule, (loopDur - 0.5) * 1000);
+    };
+    schedule();
+
+    return {
+      stop() {
+        clearTimeout(loopTimer);
+        nodes.forEach(n => { try { n.stop(); } catch(e){} });
+      }
+    };
+  }
+
+  function playBgm(name) {
+    init(); resume();
+    if (currentBgmName === name) return;
+    if (currentBgm) { currentBgm.stop(); currentBgm = null; }
+    currentBgmName = name;
+    if (muted) return;
+    if (name === 'title') currentBgm = buildTitleBgm();
+    else if (name === 'prep') currentBgm = buildPrepBgm();
+    else currentBgm = buildBattleBgm();
+  }
+
+  function stopBgm() {
+    if (currentBgm) { currentBgm.stop(); currentBgm = null; }
+    currentBgmName = null; // 次のplayBgm呼び出しで同名でも再生できるようにリセット
+  }
+
+  // --- SFX: 勝利 ---
+  function playWin() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    // Rising fanfare: C4 E4 G4 C5
+    const fanfare = [[261.63,0],[329.63,0.15],[392.00,0.30],[523.25,0.45],[659.25,0.55]];
+    for (const [freq, delay] of fanfare) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      const st = t + delay;
+      g.gain.setValueAtTime(0, st);
+      g.gain.linearRampToValueAtTime(0.22, st + 0.04);
+      g.gain.linearRampToValueAtTime(0.15, st + 0.18);
+      g.gain.linearRampToValueAtTime(0, st + 0.45);
+      o.connect(g); g.connect(sfxGain);
+      o.start(st); o.stop(st + 0.5);
+    }
+    // Shimmer high chord
+    for (const freq of [1046.5, 1318.5, 1567.98]) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t + 0.5);
+      g.gain.linearRampToValueAtTime(0.06, t + 0.65);
+      g.gain.linearRampToValueAtTime(0, t + 1.4);
+      o.connect(g); g.connect(sfxGain);
+      o.start(t + 0.5); o.stop(t + 1.5);
+    }
+  }
+
+  // --- SFX: 敗北 ---
+  function playLose() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    // Descending minor: A3 F3 D3 A2
+    const descent = [[220.00,0],[174.61,0.25],[146.83,0.50],[110.00,0.80]];
+    for (const [freq, delay] of descent) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.value = freq;
+      const st = t + delay;
+      g.gain.setValueAtTime(0, st);
+      g.gain.linearRampToValueAtTime(0.18, st + 0.05);
+      g.gain.linearRampToValueAtTime(0.08, st + 0.35);
+      g.gain.linearRampToValueAtTime(0, st + 0.55);
+      o.connect(g); g.connect(sfxGain);
+      o.start(st); o.stop(st + 0.6);
+    }
+    // Low thud
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(80, t + 0.9);
+    o.frequency.linearRampToValueAtTime(30, t + 1.5);
+    g.gain.setValueAtTime(0.3, t + 0.9);
+    g.gain.linearRampToValueAtTime(0, t + 1.6);
+    o.connect(g); g.connect(sfxGain);
+    o.start(t + 0.9); o.stop(t + 1.7);
+  }
+
+  function toggleMute() {
+    init();
+    muted = !muted;
+    masterGain.gain.value = muted ? 0 : volume;
+    const btn = document.getElementById('mute-btn');
+    if (btn) { btn.textContent = muted ? '🔇' : '🔊'; btn.classList.toggle('muted', muted); }
+    // If unmuting, restart current bgm
+    if (!muted && currentBgmName) {
+      const name = currentBgmName;
+      currentBgmName = null;
+      playBgm(name);
+    }
+  }
+
+  function setVolume(val) {
+    init();
+    volume = val / 100;
+    if (!muted) masterGain.gain.value = volume;
+  }
+
+  // --- SFX: 購入 ---
+  function playBuy() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    // 軽快な2音「ポン・ピン」
+    const notes = [[880, 0], [1318.5, 0.07]];
+    for (const [freq, delay] of notes) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      const st = t + delay;
+      g.gain.setValueAtTime(0, st);
+      g.gain.linearRampToValueAtTime(0.18, st + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, st + 0.18);
+      o.connect(g); g.connect(sfxGain);
+      o.start(st); o.stop(st + 0.2);
+    }
+  }
+
+  return { playBgm, stopBgm, playWin, playLose, playBuy, toggleMute, setVolume, init };
+})();
+
+// ========== TITLE SCREEN ==========
+function initParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+  const colors = ['#6a7fff','#a78bfa','#6bff9e','#f5c842','#fff'];
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 12;
+    const dur = Math.random() * 10 + 8;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}%; bottom:-10px;
+      background:${color};
+      animation-duration:${dur}s;
+      animation-delay:${delay}s;
+      box-shadow: 0 0 ${size*2}px ${color};
+    `;
+    container.appendChild(p);
+  }
+}
+
+let titleBgmStarted = false;
+
+function ensureTitleBgm() {
+  if (titleBgmStarted) return;
+  titleBgmStarted = true;
+  Audio.init();
+  Audio.playBgm('title');
+}
+
+function startGame() {
+  ensureTitleBgm(); // AudioContextを確実に起動
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('app').style.display = 'block';
+  Audio.playBgm('prep');
+  newGame();
+}
+
+function startGameFromHowTo() {
+  closeHowTo();
+  startGame();
+}
+
+function showHowTo() {
+  ensureTitleBgm();
+  document.getElementById('howto-screen').classList.add('active');
+}
+
+function closeHowTo() {
+  document.getElementById('howto-screen').classList.remove('active');
+}
+
 // ========== INIT ==========
-newGame();
+initParticles();
+// タイトル画面への任意のインタラクションでBGM開始
+document.getElementById('title-screen').addEventListener('click', ensureTitleBgm, { once: false });
+
+function toggleMute() { Audio.toggleMute(); }
+function setVolume(v) { Audio.setVolume(v); }
+
 </script>
 </body>
 </html>
