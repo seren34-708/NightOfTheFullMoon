@@ -123,12 +123,6 @@
     gap: 12px;
     flex-direction: column;
   }
-  .board-label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    margin-bottom: 6px;
-  }
   .board-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -279,6 +273,41 @@
     align-items: center;
     gap: 4px;
     position: relative;
+    height: 100px;
+    overflow: visible;
+    justify-content: center;
+  }
+  /* ショップカードツールチップ */
+  .shop-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a2e;
+    border: 1px solid var(--accent2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .shop-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--accent2);
+  }
+  .shop-card:hover .shop-tooltip,
+  .shop-card.tooltip-active .shop-tooltip {
+    display: block;
   }
   .shop-card:hover { border-color: var(--accent2); background: #1e1e30; }
   .shop-card.sold { opacity: 0.3; pointer-events: none; }
@@ -474,18 +503,31 @@
     margin: 4px 0 10px;
   }
   .levelup-pot-box {
-    background: rgba(107,255,158,0.07);
-    border: 1px solid rgba(107,255,158,0.3);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin: 12px 0 6px;
-    text-align: left;
+    background: linear-gradient(135deg, rgba(107,255,158,0.12), rgba(107,255,158,0.06));
+    border: 2px solid var(--green);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 16px 0 6px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(107,255,158,0.2);
+    animation: pot-appear 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
   }
-  .levelup-pot-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.14em; margin-bottom: 8px; text-transform: uppercase; }
-  .levelup-pot-row { display: flex; align-items: center; gap: 12px; }
-  .levelup-pot-icon { font-size: 28px; line-height:1; }
-  .levelup-pot-name { font-size: 15px; color: var(--green); font-weight: 700; margin-bottom:2px; }
-  .levelup-pot-desc { font-size: 12px; color: var(--text-dim); }
+  @keyframes pot-appear {
+    from { opacity: 0; transform: scale(0.8) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .levelup-pot-label {
+    font-size: 11px; color: var(--green); letter-spacing: 0.18em;
+    margin-bottom: 10px; font-weight: 700; text-transform: uppercase;
+  }
+  .levelup-pot-icon { font-size: 44px; display: block; margin-bottom: 6px; line-height: 1; }
+  .levelup-pot-name { font-size: 18px; color: var(--green); font-weight: 700; margin-bottom: 4px; }
+  .levelup-pot-desc {
+    font-size: 13px; color: var(--text);
+    background: rgba(107,255,158,0.1); border-radius: 6px;
+    padding: 4px 10px; display: inline-block; margin-top: 2px;
+  }
+  .levelup-pot-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .lu-shop-badge {
     display: inline-block;
     font-size: 11px;
@@ -575,12 +617,6 @@
   .divider { border-top: 1px solid var(--border); margin: 8px 0; }
 
   /* 戦闘コントロール */
-  .speed-divider {
-    width: 1px;
-    background: var(--border);
-    margin: 0 2px;
-    align-self: stretch;
-  }
   .speed-btn {
     background: var(--bg3);
     border: 1px solid var(--border);
@@ -649,29 +685,23 @@
   .vol-slider { accent-color: var(--accent2); width: 64px; }
 
   /* ===== ITEM SYSTEM ===== */
-  .item-badge {
-    position: absolute;
-    bottom: 2px;
-    left: 2px;
-    font-size: 10px;
-    line-height: 1;
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
-  }
   /* ショップカード: アイテム */
   .shop-card.item-card { border-color: rgba(245,200,66,0.4); background: rgba(245,200,66,0.05); }
   .shop-card.item-card:hover { border-color: var(--gold); background: rgba(245,200,66,0.1); }
   .shop-card.magic-card { border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.05); }
   .shop-card.magic-card:hover { border-color: var(--accent2); background: rgba(167,139,250,0.1); }
   .item-type-badge {
-    font-size: 9px;
-    padding: 1px 5px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    padding: 1px 4px;
     border-radius: 3px;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
   }
   .item-type-equip { background: rgba(245,200,66,0.2); color: var(--gold); border: 1px solid rgba(245,200,66,0.4); }
   .item-type-magic { background: rgba(167,139,250,0.2); color: var(--accent2); border: 1px solid rgba(167,139,250,0.4); }
-  .item-effect-text { font-size: 9px; color: var(--text-dim); text-align: center; line-height: 1.3; }
 
   /* アイテムインベントリ */
   .item-inventory {
@@ -702,21 +732,6 @@
   .inv-item.potion-item.selected-item { border-color: var(--green) !important; box-shadow: 0 0 8px rgba(107,255,158,0.5); }
   .inv-item .item-icon { font-size: 14px; }
   .inv-item .item-name { color: var(--text); font-size: 10px; }
-  .inv-item .item-sell-btn {
-    margin-left: 3px;
-    font-size: 9px;
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 1px 4px;
-    background: transparent;
-    cursor: pointer;
-    line-height: 1.4;
-    transition: all 0.12s;
-    font-family: inherit;
-    flex-shrink: 0;
-  }
-  .inv-item .item-sell-btn:hover { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.1); }
   .inv-empty { font-size: 11px; color: #444; font-style: italic; }
 
   /* 装備中ユニットの装備アイコン表示 */
@@ -958,6 +973,162 @@
     transition: all 0.2s;
   }
   .howto-start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ===== MODE SELECT MODAL ===== */
+  .mode-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 300;
+  }
+  .mode-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    max-width: 320px; width: 90%;
+    text-align: center;
+  }
+  .mode-title { font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .mode-sub   { font-size: 12px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.5; }
+  .mode-btn {
+    display: block; width: 100%;
+    padding: 14px 0; border-radius: 10px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    border: 1px solid; margin-bottom: 12px;
+    transition: all 0.15s; letter-spacing: 0.05em;
+  }
+  .mode-btn-easy {
+    background: linear-gradient(135deg,rgba(107,255,158,0.15),rgba(107,255,158,0.28));
+    border-color: var(--green); color: var(--green);
+  }
+  .mode-btn-easy:hover { background: rgba(107,255,158,0.38); }
+  .mode-btn-normal {
+    background: linear-gradient(135deg,rgba(106,127,255,0.2),rgba(106,127,255,0.35));
+    border-color: var(--accent); color: var(--accent);
+  }
+  .mode-btn-normal:hover { background: rgba(106,127,255,0.45); }
+  .mode-btn-hard {
+    background: linear-gradient(135deg,rgba(255,80,80,0.15),rgba(255,80,80,0.28));
+    border-color: #ff5050; color: #ff7070;
+  }
+  .mode-btn-hard:hover { background: rgba(255,80,80,0.38); }
+  .mode-btn-tutorial {
+    background: linear-gradient(135deg,rgba(245,200,66,0.1),rgba(245,200,66,0.2));
+    border-color: var(--gold); color: var(--gold);
+  }
+  .mode-btn-tutorial:hover { background: rgba(245,200,66,0.3); }
+  .mode-btn-cancel {
+    background: transparent; border-color: var(--border);
+    color: var(--text-dim); font-size: 13px; padding: 10px 0; margin-bottom: 0;
+  }
+
+  /* ===== TUTORIAL TOOLTIP ===== */
+  #tut-overlay {
+    position: fixed; inset: 0; z-index: 400;
+    background: rgba(0,0,0,0.45);
+    pointer-events: all;
+  }
+  #tut-box {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    background: #12122a;
+    border: 2px solid var(--green);
+    border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    padding: 16px 20px 28px;
+    pointer-events: all;
+    box-shadow: 0 -4px 32px rgba(107,255,158,0.2);
+    z-index: 401;
+    box-sizing: border-box;
+  }
+  /* ドラッグバー風の装飾 */
+  #tut-box::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    background: rgba(107,255,158,0.35);
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+  #tut-step-label {
+    font-size: 10px; color: var(--green); letter-spacing: 0.12em;
+    font-weight: 700; margin-bottom: 4px; text-align: center;
+  }
+  #tut-title {
+    font-size: 17px; color: var(--text); font-weight: 700;
+    margin-bottom: 10px; text-align: center;
+  }
+  #tut-body {
+    font-size: 13px; color: var(--text-dim); line-height: 1.7;
+    margin-bottom: 14px; text-align: left;
+  }
+  #tut-progress {
+    display: flex; gap: 6px; margin-bottom: 14px; justify-content: center;
+  }
+  .tut-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); transition: background 0.2s;
+  }
+  .tut-dot.done { background: var(--green); }
+  .tut-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  #tut-next-btn {
+    width: 100%; padding: 13px; border-radius: 10px;
+    background: rgba(107,255,158,0.15); border: 1px solid var(--green);
+    color: var(--green); font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  #tut-next-btn:disabled {
+    opacity: 0.3; cursor: not-allowed;
+  }
+  #tut-skip {
+    font-size: 12px; color: var(--text-dim); cursor: pointer;
+    text-align: center; text-decoration: underline;
+    padding: 12px 8px 0;
+    display: block;
+  }
+  .tut-highlight {
+    position: relative; z-index: 402;
+    box-shadow: 0 0 0 3px var(--green), 0 0 16px rgba(107,255,158,0.4) !important;
+    border-radius: 8px;
+  }
+  /* ===== TREASURE EVENT ===== */
+  .treasure-choice {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.15s; text-align: left;
+  }
+  .treasure-choice:hover { border-color: var(--gold); background: rgba(245,200,66,0.08); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(245,200,66,0.15); }
+  .treasure-choice-icon { font-size: 32px; flex-shrink: 0; }
+  .treasure-choice-info { flex: 1; }
+  .treasure-choice-type { font-size: 9px; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 2px; }
+  .treasure-choice-name { font-size: 15px; color: var(--text); font-weight: 700; }
+  .treasure-choice-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .treasure-choice-free { font-size: 10px; color: var(--green); font-weight: 700; border: 1px solid var(--green); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+
+  /* ===== SCOREBOARD ===== */
+  .score-tab {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); border-radius: 6px; padding: 4px 10px;
+    font-size: 11px; cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .score-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(106,127,255,0.15); }
+  .score-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: 8px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  }
+  .score-row.rank-1 { border-color: var(--gold); background: rgba(245,200,66,0.06); }
+  .score-row.rank-2 { border-color: #c0c0c0; background: rgba(192,192,192,0.04); }
+  .score-row.rank-3 { border-color: #cd7f32; background: rgba(205,127,50,0.04); }
+  .score-rank { font-size: 14px; width: 22px; text-align: center; flex-shrink: 0; }
+  .score-info { flex: 1; min-width: 0; }
+  .score-name { font-size: 11px; color: var(--text-dim); }
+  .score-pts  { font-size: 15px; color: var(--text); font-weight: 700; }
+  .score-empty { font-size: 12px; color: #444; text-align: center; padding: 16px 0; font-style: italic; }
 </style>
 </head>
 <body>
@@ -972,9 +1143,16 @@
   <div class="title-buttons">
     <button class="title-btn title-btn-primary" onclick="startGame()">⚔️ &nbsp; Start Battle</button>
     <button class="title-btn title-btn-secondary" onclick="showHowTo()">📖 &nbsp; How to Play</button>
-    <button class="title-btn title-btn-secondary" onclick="startDebug()" style="border-color:#f59e0b;color:#f59e0b;opacity:0.7;font-size:12px;padding:10px 24px">🛠 &nbsp; Debug</button>
   </div>
-  <div class="title-version">v1.0 MVP</div>
+  <div id="title-scoreboard" style="margin-top:20px;width:min(90vw,340px)">
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px" id="score-tab-btns">
+      <button class="score-tab active" onclick="switchScoreTab('easy')">🌿 Easy</button>
+      <button class="score-tab" onclick="switchScoreTab('normal')">⚔️ Normal</button>
+      <button class="score-tab" onclick="switchScoreTab('hard')">🔥 Hard</button>
+    </div>
+    <div id="score-list"></div>
+  </div>
+  <div class="title-version">v1.0</div>
 </div>
 
 <!-- ===== HOW TO PLAY SCREEN ===== -->
@@ -999,28 +1177,29 @@
       <div class="howto-text">
         各ラウンドは <strong>準備フェーズ → 戦闘フェーズ → 結果</strong> の順に進む。<br><br>
         <strong>① 準備フェーズ</strong><br>
-        ・ラウンド開始時に <span class="howto-tag tag-gold">💰 5G</span>（勝利中は+1G）を受け取る<br>
-        ・ショップでユニットを購入し、盤面に配置する<br>
+        ・ラウンド開始時に <span class="howto-tag tag-gold">💰 5G</span> を受け取る<br>
+        ・ショップでユニット・装備・魔法を購入し、盤面に配置する<br>
         ・準備ができたら「⚔️ 戦闘開始」ボタンを押す<br><br>
         <strong>② 戦闘フェーズ（自動）</strong><br>
-        ・味方と敵が交互に攻撃し、全滅した側が負け<br>
-        ・プレイヤーは操作不要。速度スライダーで観戦ペースを調整できる<br><br>
+        ・前列のユニットから順に攻撃し、全滅した側が負け<br>
+        ・速度ボタンで観戦ペースを調整できる（▶〜▶▶▶▶）<br><br>
         <strong>③ 結果</strong><br>
         ・<span class="howto-tag tag-green">勝利</span> → <span class="howto-tag tag-gold">+3G</span> <span class="howto-tag tag-green">+1EXP</span> を獲得<br>
-        ・<span class="howto-tag tag-red">敗北</span> → ラウンドに応じた <span class="howto-tag tag-red">Life ダメージ</span>（R1-4: -1、R5-9: -2…）
+        ・<span class="howto-tag tag-red">敗北</span> → <span class="howto-tag tag-red">Life -1</span>（ラウンドに関わらず常に -1）
       </div>
     </div>
 
     <div class="howto-section">
       <div class="howto-section-title">🛒 ショップ</div>
       <div class="howto-text">
-        ショップには毎ラウンド5体のユニットが並ぶ。コストはTierと同じ金額。
+        ショップには毎ラウンド5枠のカードが並ぶ。ユニット・装備・魔法が出現する。<br>
+        <span class="howto-tag tag-purple">📱 スマホ操作</span> カードを<strong>1回タップ → 詳細表示</strong>、<strong>2回目タップ → 購入</strong>
       </div>
       <div class="howto-grid" style="margin-top:8px">
-        <div class="howto-card"><strong>購入</strong>ユニットをクリックして購入。盤面が満杯ならベンチへ</div>
+        <div class="howto-card"><strong>購入</strong>カードをタップして購入。ユニットは盤面が満杯ならベンチへ</div>
         <div class="howto-card"><strong>🎲 リロール（1G）</strong>ショップのラインナップを全て入れ替える</div>
-        <div class="howto-card"><strong>⬆️ EXP購入（2G）</strong>2Gで EXP+1。レベルが上がると高Tierが出やすくなる</div>
-        <div class="howto-card"><strong>売却</strong>ユニット選択後「売却」ボタン。★の数だけGoldが戻る</div>
+        <div class="howto-card"><strong>⬆️ EXP購入（2G）</strong>2GでEXP+1。レベルが上がると高Tierが出やすくなる</div>
+        <div class="howto-card"><strong>売却</strong>ユニット・装備を選択後「売却」ボタン。購入金額の半額が戻る</div>
       </div>
     </div>
 
@@ -1028,18 +1207,53 @@
       <div class="howto-section-title">⭐ 合成システム</div>
       <div class="howto-text">
         <strong>同じユニットを3体</strong>集めると自動的に合成されて <span class="howto-tag tag-purple">★アップ</span>！<br>
-        ★1 × 3体 → ★2（ATK/HP ×1.5）<br>
-        ★2 × 3体 → ★3（ATK/HP ×2.0）<br>
-        合成は盤面・ベンチをまたいで発動。さらに連鎖合成も可能！
+        ★1 × 3体 → ★2（ATK/HP ×1.8倍）<br>
+        ★2 × 3体 → ★3（ATK/HP ×2.8倍）<br>
+        合成は盤面・ベンチをまたいで発動。さらに連鎖合成も可能！<br>
+        装備・ポーション効果は合成後も引き継がれる。
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">🗡 装備・✨ 魔法</div>
+      <div class="howto-text">
+        ショップに装備・魔法が出現することがある（R1は出現しない）。<br><br>
+        <strong>🗡 装備</strong>：インベントリから選択 → ユニットをタップで装着。<br>
+        　1ユニットに最大2個まで。売却・合成時はインベントリに返却。<br><br>
+        <strong>✨ 魔法</strong>：インベントリから選択 → 「✨ 発動」ボタンで即時効果。<br>
+        　準備フェーズ中いつでも使え、使わなければ次ラウンドに持ち越し可能。
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.1em;margin-bottom:6px">🗡 装備一覧</div>
+        <div class="howto-grid">
+          <div class="howto-card"><strong>🗡 鋼の剣 (2G)</strong>ATK +3</div>
+          <div class="howto-card"><strong>🛡 守護の盾 (2G)</strong>HP +10</div>
+          <div class="howto-card"><strong>⚙️ 鉄の鎧 (3G)</strong>HP +18</div>
+          <div class="howto-card"><strong>🔪 毒匕首 (2G)</strong>ATK +5</div>
+          <div class="howto-card"><strong>👑 王者の冠 (4G)</strong>ATK +4 / HP +12</div>
+          <div class="howto-card"><strong>💍 力の指輪 (3G)</strong>ATK +6</div>
+          <div class="howto-card" style="grid-column:span 2"><strong>👟 疾風の靴 (2G)</strong>ATK +2 / HP +6</div>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:11px;color:var(--accent2);font-weight:700;letter-spacing:0.1em;margin-bottom:6px">✨ 魔法一覧</div>
+        <div class="howto-grid">
+          <div class="howto-card"><strong>✨ 聖域の光 (2G)</strong>全味方 HP+5</div>
+          <div class="howto-card"><strong>🔥 血戦の号令 (3G)</strong>全味方 ATK+2</div>
+          <div class="howto-card"><strong>⚡ 神の祝福 (4G)</strong>全味方 ATK+3 / HP+8</div>
+          <div class="howto-card"><strong>📖 蘇生の書 (3G)</strong>最初に倒れた味方1体を復活(HP50%)</div>
+          <div class="howto-card"><strong>🌫️ 呪いの霧 (3G)</strong>全敵 ATK-3（最低1）</div>
+          <div class="howto-card"><strong>⚡ 雷撃 (2G)</strong>敵1体に15ダメージ</div>
+        </div>
       </div>
     </div>
 
     <div class="howto-section">
       <div class="howto-section-title">📋 盤面・ベンチ</div>
       <div class="howto-text">
-        盤面は <strong>3×2マス（Front列・Back列）</strong>、ベンチは最大8枠。<br>
-        Front列のユニットが先に攻撃対象になる。タンクはFrontに！<br><br>
-        <strong>ユニットの移動：</strong>ユニットをクリックして選択 → 移動先をクリック（スワップ可）
+        盤面は <strong>3×2マス（前列・後列）</strong>、ベンチは最大8枠。<br>
+        <strong>前列</strong>のユニットが先に戦闘対象になる。タンクは前列に！<br><br>
+        <strong>ユニットの移動：</strong>ユニットをタップして選択 → 移動先をタップ（スワップ可）
       </div>
     </div>
 
@@ -1063,7 +1277,7 @@
       <div class="howto-section-title">🧪 ポーション（レベルアップボーナス）</div>
       <div class="howto-text">
         プレイヤーが <strong>レベルアップ</strong> するたびに専用ポーションを1本入手！<br>
-        インベントリでポーションを選択 → ユニットをクリックすると<span class="howto-tag tag-green">恒久強化</span>。<br>
+        インベントリでポーションを選択 → ユニットをタップすると<span class="howto-tag tag-green">恒久強化</span>。<br>
         装備と違い外せないが、★合成後もステータスは引き継がれる。<br><br>
         Lv2: 🟥力の雫（ATK+3）　Lv3: 🟦体力の雫（HP+15）<br>
         Lv4: 🟧戦士の秘薬（ATK+5）　Lv5: 🟩守護の秘薬（HP+25）<br>
@@ -1077,6 +1291,43 @@
   </div>
 </div>
 
+<!-- ===== MODE SELECT MODAL ===== -->
+<div class="mode-overlay" id="mode-modal" style="display:none">
+  <div class="mode-box">
+    <div class="mode-title">⚔️ ゲームモード選択</div>
+    <div class="mode-sub">難易度とモードを選んでください</div>
+    <button class="mode-btn mode-btn-easy" onclick="startWithDifficulty('easy')">
+      🌿 &nbsp; Easy<br>
+      <span style="font-size:11px;font-weight:400;opacity:0.75">敵が弱め。初めての方におすすめ</span>
+    </button>
+    <button class="mode-btn mode-btn-normal" onclick="startWithDifficulty('normal')">
+      ⚔️ &nbsp; Normal<br>
+      <span style="font-size:11px;font-weight:400;opacity:0.75">標準の難易度。全20ラウンド</span>
+    </button>
+    <button class="mode-btn mode-btn-hard" onclick="startWithDifficulty('hard')">
+      🔥 &nbsp; Hard<br>
+      <span style="font-size:11px;font-weight:400;opacity:0.75">敵が強力。上級者向け</span>
+    </button>
+    <button class="mode-btn mode-btn-tutorial" onclick="startTutorial()">
+      📘 &nbsp; チュートリアル<br>
+      <span style="font-size:11px;font-weight:400;opacity:0.75">初めての方はこちら。基本を学ぼう</span>
+    </button>
+    <button class="mode-btn mode-btn-cancel" onclick="document.getElementById('mode-modal').style.display='none'">キャンセル</button>
+  </div>
+</div>
+
+<!-- ===== TUTORIAL OVERLAY ===== -->
+<div id="tut-overlay" style="display:none" onclick="void(0)">
+  <div id="tut-box" onclick="event.stopPropagation()">
+    <div id="tut-step-label">STEP 1 / 9</div>
+    <div id="tut-title"></div>
+    <div id="tut-progress"></div>
+    <div id="tut-body"></div>
+    <button id="tut-next-btn" onclick="tutNext()">次へ →</button>
+    <div id="tut-skip" onclick="tutSkip()">チュートリアルをスキップ</div>
+  </div>
+</div>
+
 <div id="app" style="display:none">
   <div class="header">
     <div class="game-title">Battle of Memories</div>
@@ -1086,6 +1337,7 @@
       <div class="stat"><span class="stat-label">❤️</span><span class="stat-val life" id="stat-life">3</span></div>
       <div class="stat"><span class="stat-label">Lv</span><span class="stat-val" id="stat-lv">1</span></div>
       <div class="stat" id="phase-badge-wrap"><span class="phase-badge prep" id="phase-badge">準備</span></div>
+      <span id="diff-badge" style="display:none;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:0.05em"></span>
     </div>
     <div style="display:flex;align-items:center;gap:5px">
       <!-- 停止ボタン（戦闘中のみ） -->
@@ -1094,7 +1346,6 @@
       <button class="speed-btn speed-cycle-btn" onclick="cycleSpeed()" id="speed-cycle-btn" title="速度切替">&#9654;</button>
       <!-- 即時ボタン（戦闘中のみ） -->
       <button class="speed-btn instant-btn" onclick="setInstant()" id="instant-btn" title="即時" style="display:none">&#9889;</button>
-      <div class="speed-divider" style="height:18px"></div>
       <div class="audio-controls">
         <button class="audio-btn" id="mute-btn" onclick="toggleMute()" title="ミュート">🔊</button>
         <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" oninput="setVolume(this.value)" title="音量">
@@ -1135,7 +1386,17 @@
             <span id="sell-hint-text">選択中: -</span>
             <div id="equip-remove-list" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px"></div>
           </div>
-          <button class="btn btn-red" onclick="sellSelected()" style="margin-left:8px;flex-shrink:0">売却</button>
+          <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px">
+            <button class="btn btn-red" id="sell-confirm-btn" onclick="showSellConfirm()" style="flex-shrink:0">売却</button>
+          </div>
+        </div>
+        <!-- 売却確認パネル -->
+        <div id="sell-confirm-panel" style="display:none;margin-bottom:8px;background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.4);border-radius:8px;padding:8px 12px;text-align:center">
+          <div style="font-size:12px;color:var(--text);margin-bottom:8px" id="sell-confirm-text">本当に売却しますか？</div>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <button class="btn btn-red" onclick="sellSelected()" style="padding:4px 16px;font-size:12px">売却する</button>
+            <button class="btn" onclick="hideSellConfirm()" style="padding:4px 16px;font-size:12px;border-color:var(--border);color:var(--text-dim)">キャンセル</button>
+          </div>
         </div>
         <!-- 6マスグリッド（前列上段・後列下段） -->
         <div class="board-grid" id="player-board"></div>
@@ -1215,8 +1476,40 @@
     <div style="font-size:48px;margin-bottom:12px">🏆</div>
     <h2 style="font-size:28px;color:var(--gold);text-shadow:0 0 24px rgba(245,200,66,0.7);margin-bottom:8px;letter-spacing:0.1em">CLEAR！</h2>
     <p style="color:var(--text-dim);font-size:14px;margin-bottom:6px">全20ラウンドを突破！</p>
-    <p style="color:var(--text);font-size:13px;margin-bottom:28px" id="clear-stats"></p>
-    <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px" onclick="showClearRanking()">結果を見る</button>
+    <p style="color:var(--text);font-size:13px;margin-bottom:4px" id="clear-stats"></p>
+    <div id="clear-score-display" style="margin:12px 0 20px;padding:12px;background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.4);border-radius:10px">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:0.1em;margin-bottom:4px">SCORE</div>
+      <div id="clear-score-val" style="font-size:32px;font-weight:900;color:var(--gold)">0</div>
+      <div id="clear-score-rank" style="font-size:11px;color:var(--text-dim);margin-top:2px"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px" onclick="showClearRanking()">🏠 タイトルに戻る</button>
+  </div>
+</div>
+
+<!-- GAME OVER SCREEN -->
+<div class="overlay" id="gameover-screen" style="display:none">
+  <div class="modal" style="max-width:360px;text-align:center;padding:40px 32px">
+    <div style="font-size:52px;margin-bottom:12px" id="gameover-icon">💀</div>
+    <h2 style="font-size:28px;color:var(--red);text-shadow:0 0 24px rgba(255,80,80,0.6);margin-bottom:8px;letter-spacing:0.1em">GAME OVER</h2>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:6px" id="gameover-round"></p>
+    <p style="color:var(--text);font-size:13px;margin-bottom:4px" id="gameover-stats"></p>
+    <div id="gameover-score-display" style="margin:12px 0 20px;padding:12px;background:rgba(255,80,80,0.06);border:1px solid rgba(255,80,80,0.3);border-radius:10px">
+      <div style="font-size:11px;color:#ff7070;letter-spacing:0.1em;margin-bottom:4px">SCORE</div>
+      <div id="gameover-score-val" style="font-size:32px;font-weight:900;color:#ff7070">0</div>
+      <div id="gameover-score-rank" style="font-size:11px;color:var(--text-dim);margin-top:2px"></div>
+    </div>
+    <button class="btn" style="width:100%;font-size:15px;padding:12px;border-color:var(--red);color:var(--red);background:rgba(255,80,80,0.1);margin-bottom:10px" onclick="closeGameOver(); startWithDifficulty(G.difficulty||'normal')">🔄 もう一度</button>
+    <button class="btn" style="width:100%;font-size:14px;padding:10px;border-color:var(--border);color:var(--text-dim)" onclick="closeGameOver()">🏠 タイトルに戻る</button>
+  </div>
+</div>
+
+<!-- TREASURE EVENT MODAL -->
+<div class="overlay" id="treasure-modal" style="display:none">
+  <div class="modal" style="max-width:380px;text-align:center;padding:32px 24px">
+    <div style="font-size:52px;margin-bottom:8px;animation:lvup-pop 0.4s cubic-bezier(0.34,1.56,0.64,1)">🎁</div>
+    <h2 style="font-size:22px;color:var(--gold);letter-spacing:0.1em;margin-bottom:6px">宝箱発見！</h2>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px">3つの中から1つを選んで無料でもらおう！</p>
+    <div id="treasure-choices" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
 </div>
 
@@ -1236,13 +1529,12 @@
     <div class="lu-lv-num" id="lu-level"></div>
     <p id="lu-sub" style="font-size:12px;color:var(--accent);margin-bottom:2px;letter-spacing:0.08em"></p>
     <div id="lu-pot-box" class="levelup-pot-box" style="display:none">
-      <div class="levelup-pot-label">🧪 ボーナスポーション入手</div>
+      <div class="levelup-pot-label">🧪 ポーション入手！</div>
       <div class="levelup-pot-row">
         <span class="levelup-pot-icon" id="lu-pot-icon"></span>
-        <div>
-          <div class="levelup-pot-name" id="lu-pot-name"></div>
-          <div class="levelup-pot-desc" id="lu-pot-desc"></div>
-        </div>
+        <div class="levelup-pot-name" id="lu-pot-name"></div>
+        <div class="levelup-pot-desc" id="lu-pot-desc"></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px">インベントリに追加されました。<br>ユニットに使うと永続強化！</div>
       </div>
     </div>
     <div id="lu-shop-badge" class="lu-shop-badge"></div>
@@ -1324,7 +1616,7 @@ const UNITS_DATA = [
   { id:"t4_dragon", name:"竜騎士",   tier:4, atk_base:14,hp_base:38, icon:"🐉" },
   { id:"t4_necro",  name:"死霊術師", tier:4, atk_base:16,hp_base:28, icon:"💀" },
   // Tier 5
-  { id:"t5_god",    name:"神獣",     tier:5, atk_base:22,hp_base:60, icon:"🌈" },
+  { id:"t5_god",    name:"神獣",     tier:5, atk_base:22,hp_base:60, icon:"🦄" },
 ];
 
 const TIER_COLORS = ["","t1","t2","t3","t4","t5"];
@@ -1392,7 +1684,6 @@ function weightedPick(table) {
 }
 
 // ========== ROUND-BASED ECONOMY TABLE ==========
-// 連勝ボーナス廃止。その分収入・勝利報酬に分散。
 // [maxRound, 収入, 勝利Gold, 勝利EXP]
 const ROUND_ECONOMY = [
   //  maxRound, income, winGold, winExp
@@ -1472,13 +1763,13 @@ function buyShop(idx) {
     G.gold -= cost;
     G.shop[idx] = null;
     if (entry.type === "equip") {
-      // 装備：インベントリへ（後でユニットに装着）
       G.inventory.push({ ...entry });
       addLog("gold",`${entry.icon}${entry.name}（装備）を購入 (-${cost}G)`);
+      tutOnBuyEquip();
     } else {
-      // 魔法：インベントリへ
       G.inventory.push({ ...entry });
       addLog("gold",`${entry.icon}${entry.name}（魔法）を購入 (-${cost}G)`);
+      tutOnBuyMagic();
     }
     Audio.playBuy();
     render();
@@ -1508,6 +1799,7 @@ function buyShop(idx) {
   Audio.playBuy();
   checkMerge();
   render();
+  tutOnBuy();
 }
 
 function reroll() {
@@ -1565,7 +1857,7 @@ function showLevelUpModal(lv, pot) {
     potBox.style.display = "block";
     document.getElementById("lu-pot-icon").textContent = pot.icon;
     document.getElementById("lu-pot-name").textContent = pot.name;
-    document.getElementById("lu-pot-desc").textContent = pot.desc + "　→ インベントリに追加";
+    document.getElementById("lu-pot-desc").textContent = pot.desc;
   } else {
     potBox.style.display = "none";
   }
@@ -1579,6 +1871,23 @@ function closeLevelUpModal() {
 }
 
 // ========== SELL ==========
+function showSellConfirm() {
+  const sel = G.selected;
+  if (!sel) return;
+  const unit = sel.type==="board" ? G.board[sel.row][sel.col] : G.bench[sel.idx];
+  if (!unit) return;
+  const val = unit.stars;
+  document.getElementById("sell-confirm-text").innerHTML =
+    `<strong>${unit.icon}${unit.name}（★${unit.stars}）</strong> を売却しますか？<br><span style="color:var(--gold);font-size:11px">+${val}G 獲得${unit.equips&&unit.equips.length>0?" / 装備はインベントリに返却":""}</span>`;
+  document.getElementById("sell-hint-panel").style.display = "none";
+  document.getElementById("sell-confirm-panel").style.display = "block";
+}
+
+function hideSellConfirm() {
+  document.getElementById("sell-confirm-panel").style.display = "none";
+  if (G.selected) document.getElementById("sell-hint-panel").style.display = "flex";
+}
+
 function sellSelected() {
   const sel = G.selected;
   if (!sel) return;
@@ -1691,6 +2000,7 @@ function clearSel() {
   G.selected = null;
   G.selectedItem = null;
   document.getElementById("sell-hint-panel").style.display="none";
+  document.getElementById("sell-confirm-panel").style.display="none";
   render();
 }
 
@@ -1723,6 +2033,19 @@ function selectBoard(r, c) {
   render();
 }
 
+// 装備をインベントリに返却するヘルパー
+function stripEquipsToInventory(unit) {
+  if (!unit || !unit.equips || unit.equips.length === 0) return;
+  const returned = [];
+  for (const eq of unit.equips) {
+    G.inventory.push({ ...eq, iid: ++G.uid, _isItem: true, type: "equip" });
+    returned.push(eq.icon + eq.name);
+  }
+  unit.equips = [];
+  if (returned.length > 0)
+    addLog("info", `装備をインベントリに返却：${returned.join("・")}`);
+}
+
 function selectBench(idx) {
   if (G.phase !== "prep") return;
   const unit = G.bench[idx];
@@ -1740,10 +2063,14 @@ function selectBench(idx) {
     if (sel.type==="bench" && sel.idx===idx) { clearSel(); return; }
     const fromUnit = sel.type==="board" ? G.board[sel.row][sel.col] : G.bench[sel.idx];
     const toUnit = unit;
+    // 盤面→ベンチ へ移動するユニットの装備を外す
+    if (sel.type==="board" && fromUnit) stripEquipsToInventory(fromUnit);
+    // ベンチ→ベンチ でfromがベンチ、toが盤面でない場合（ベンチ同士スワップ）はスワップ先も確認不要
     if (sel.type==="board") G.board[sel.row][sel.col]=toUnit;
     else G.bench[sel.idx]=toUnit;
     G.bench[idx]=fromUnit;
     clearSel();
+    render();
     return;
   }
   if (!unit) return;
@@ -1885,8 +2212,14 @@ function startBattle() {
   G.phase = "battle";
   clearSel();
 
-  // Generate enemy
-  const enemy = generateEnemy();
+  // Generate enemy（チュートリアル時は弱い敵1体のみ）
+  let enemy;
+  if (G.tutorialMode) {
+    const weakDef = UNITS_DATA.find(u => u.id === "t1_shield");
+    enemy = [[makeUnit(weakDef,1),null,null],[null,null,null]];
+  } else {
+    enemy = generateEnemy();
+  }
   G.enemyBoard = enemy;
 
   // Deep copy boards for battle
@@ -1901,6 +2234,8 @@ function startBattle() {
 
   G.battleState = { pBoard, eBoard, turn:0, maxTurns:200, done:false, revivedUsed:false };
   addBattleLog("info","━━━ 戦闘開始 ━━━");
+
+  tutOnBattle();
 
   Audio.playBgm('battle');
   renderBattle();
@@ -1971,30 +2306,43 @@ const ENEMY_ROUNDS = [
 
 function getEnemyConfig(round) {
   for (const [max, budget, table] of ENEMY_ROUNDS) {
-    if (round <= max) return { budget, table };
+    if (round <= max) {
+      const diff = G.difficulty || "normal";
+      const budgetMult = diff === "easy" ? 0.7 : diff === "hard" ? 1.4 : 1.0;
+      return { budget: Math.round(budget * budgetMult), table };
+    }
   }
-  return { budget: 80, table: [[5,100]] };
+  const diff = G.difficulty || "normal";
+  const budgetMult = diff === "easy" ? 0.7 : diff === "hard" ? 1.4 : 1.0;
+  return { budget: Math.round(80 * budgetMult), table: [[5,100]] };
 }
 
 function generateEnemy() {
   const round = G.round;
   const { budget, table } = getEnemyConfig(round);
+  const diff = G.difficulty || "normal";
+  const hpMult = diff === "hard" ? 1.3 : 1.0;
   let spent = 0;
   const units = [];
   while (spent < budget) {
     const tier = weightedPick(table);
     if (spent + tier > budget) {
-      // 予算オーバーなら1つ下のTierで試みる（無駄予算を減らす）
       const fallback = tier - 1;
       if (fallback >= 1 && spent + fallback <= budget) {
         const pool2 = UNITS_DATA.filter(u=>u.tier===fallback);
-        if (pool2.length) { units.push(makeUnit(pool2[rnd(pool2.length)],1)); spent+=fallback; continue; }
+        if (pool2.length) {
+          const u = makeUnit(pool2[rnd(pool2.length)],1);
+          if (hpMult !== 1.0) { u.hp = Math.round(u.hp*hpMult); u.maxHp = u.hp; u.hp_base = u.hp; }
+          units.push(u); spent+=fallback; continue;
+        }
       }
       break;
     }
     const pool = UNITS_DATA.filter(u=>u.tier===tier);
     const def = pool[rnd(pool.length)];
-    units.push(makeUnit(def,1));
+    const u = makeUnit(def,1);
+    if (hpMult !== 1.0) { u.hp = Math.round(u.hp*hpMult); u.maxHp = u.hp; u.hp_base = u.hp; }
+    units.push(u);
     spent += tier;
     if (units.length>=6) break;
   }
@@ -2010,14 +2358,6 @@ function generateEnemy() {
 
 function getFirstUnit(board) {
   // 前列(row0)→後列(row1)、左→右の順で最初の生存ユニットを返す
-  for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
-    const u = board[r][c];
-    if (u && u.curHp>0) return {r,c,u};
-  }
-  return null;
-}
-
-function getTarget(board) {
   for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
     const u = board[r][c];
     if (u && u.curHp>0) return {r,c,u};
@@ -2093,6 +2433,20 @@ function runBattleStep() {
 function endBattle(result) {
   Audio.stopBgm();
   setTimeout(()=>{
+    // チュートリアルモード：勝敗に関係なくStep5へ
+    if (G.tutorialMode) {
+      Audio.playWin();
+      showTutStep(TUT_STEPS.length - 1);
+      // 準備画面に戻す
+      G.phase = "prep";
+      document.getElementById("prep-view").classList.remove("hidden");
+      document.getElementById("battle-view").classList.remove("active");
+      document.getElementById("phase-badge").textContent="準備";
+      document.getElementById("phase-badge").className="phase-badge prep";
+      showSpeedBtns(false);
+      document.getElementById("battle-log-box").innerHTML="";
+      return;
+    }
     if (result==="win") {
       const { winGold, winExp } = getRoundEconomy(G.round);
       G.gold += winGold; G.exp += winExp;
@@ -2105,11 +2459,11 @@ function endBattle(result) {
       G.life -= 1;
       G.lastResult = "lose";
       addBattleLog("lose",`😞 敗北… Life -1 (残り: ${G.life})`);
-      Audio.playLose();
       if (G.life<=0) {
-        showModal("lose","ゲームオーバー",`Round ${G.round} で力尽きた…`);
+        showGameOver();
         return;
       }
+      Audio.playLose();
       showModal("lose","敗北",`Life -1 → 残り ${G.life}`);
     } else {
       G.lastResult = "draw";
@@ -2120,7 +2474,7 @@ function endBattle(result) {
 }
 
 function afterBattle() {
-  if (G.life<=0) { newGame(); return; }
+  if (G.life<=0) { return; }
   // ラウンド20勝利 → クリア画面
   if (G.round>=20 && G.lastResult==="win") {
     showClearScreen(); return;
@@ -2129,34 +2483,212 @@ function afterBattle() {
   if (G.lastResult === "win" || G.lastResult === "draw") {
     if (G.round < 20) G.round++;
   }
-  G.phase="prep";
+  // 宝箱イベント（R5/R10/R15 勝利後）
+  if (shouldShowTreasure()) {
+    showTreasureEvent();
+    return;
+  }
+  proceedAfterEvent();
+}
+
+// ========== TREASURE EVENT ==========
+const TREASURE_ROUNDS = [5, 10, 15];
+
+function shouldShowTreasure() {
+  return G.lastResult === "win" && TREASURE_ROUNDS.includes(G.round);
+}
+
+function generateTreasureChoices() {
+  const choices = [];
+  const allItems = [...ITEMS_DATA];
+
+  // 装備1つ
+  const equips = allItems.filter(i => i.type === "equip");
+  const eq = equips[Math.floor(Math.random() * equips.length)];
+  choices.push({ ...eq, _isItem: true, iid: ++G.uid });
+
+  // 魔法1つ（装備と被らないよう）
+  const magics = allItems.filter(i => i.type === "magic");
+  const mg = magics[Math.floor(Math.random() * magics.length)];
+  choices.push({ ...mg, _isItem: true, iid: ++G.uid });
+
+  // ポーション1つ（現Lvに対応するものかランダム）
+  const potLevels = Object.keys(POTION_BY_LEVEL).map(Number);
+  const potLv = potLevels[Math.floor(Math.random() * potLevels.length)];
+  const pot = { ...POTION_BY_LEVEL[potLv], _isItem: true, _isPotion: true, iid: ++G.uid };
+  choices.push(pot);
+
+  // シャッフル
+  for (let i = choices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [choices[i], choices[j]] = [choices[j], choices[i]];
+  }
+  return choices;
+}
+
+function showTreasureEvent() {
+  const choices = generateTreasureChoices();
+  const container = document.getElementById("treasure-choices");
+  container.innerHTML = "";
+
+  choices.forEach((item, idx) => {
+    const isEquip   = item.type === "equip";
+    const isMagic   = item.type === "magic";
+    const isPotion  = !!item._isPotion;
+    const typeLabel = isEquip ? "🗡 装備" : isMagic ? "✨ 魔法" : "🧪 ポーション";
+    const typeColor = isEquip ? "var(--gold)" : isMagic ? "var(--accent2)" : "var(--green)";
+
+    const div = document.createElement("div");
+    div.className = "treasure-choice";
+    div.innerHTML = `
+      <div class="treasure-choice-icon">${item.icon}</div>
+      <div class="treasure-choice-info">
+        <div class="treasure-choice-type" style="color:${typeColor}">${typeLabel}</div>
+        <div class="treasure-choice-name">${item.name}</div>
+        <div class="treasure-choice-desc">${item.desc}</div>
+      </div>
+      <div class="treasure-choice-free">無料</div>
+    `;
+    div.onclick = () => pickTreasure(item);
+    container.appendChild(div);
+  });
+
+  document.getElementById("treasure-modal").style.display = "flex";
+  Audio.playWin();
+  addLog("info", `🎁 宝箱イベント！3択からアイテムを1つ獲得しよう`);
+}
+
+function pickTreasure(item) {
+  document.getElementById("treasure-modal").style.display = "none";
+  G.inventory.push({ ...item, iid: ++G.uid, _isItem: !item._isPotion });
+  addLog("gold", `🎁 ${item.icon}${item.name} を入手！`);
+  Audio.playBuy();
+  render();
+  proceedAfterEvent();
+}
+
+// イベント後に通常の準備フェーズへ
+function proceedAfterEvent() {
+  // afterBattle の残り処理を実行
+  G.phase = "prep";
   document.getElementById("prep-view").classList.remove("hidden");
   document.getElementById("battle-view").classList.remove("active");
-  document.getElementById("phase-badge").textContent="準備";
-  document.getElementById("phase-badge").className="phase-badge prep";
+  document.getElementById("phase-badge").textContent = "準備";
+  document.getElementById("phase-badge").className = "phase-badge prep";
   showSpeedBtns(false);
-  document.getElementById("battle-log-box").innerHTML="";
+  document.getElementById("battle-log-box").innerHTML = "";
   grantIncome();
   refreshShop();
   render();
   const { income } = getRoundEconomy(G.round);
-  addLog("info",`━━━ Round ${G.round} 開始 ━━━`);
-  addLog("gold",`収入: +${income}G → 所持 ${G.gold}G`);
+  addLog("info", `━━━ Round ${G.round} 開始 ━━━`);
+  addLog("gold", `収入: +${income}G → 所持 ${G.gold}G`);
   G.castMagicsThisRound = [];
   updateMagicBanner();
-  Audio.playBgm('prep');
+  Audio.playBgm("prep");
 }
+
+// ========== SCORE SYSTEM ==========
+const SCORE_KEY = "bom_scores_v1";
+let currentScoreTab = "normal";
+
+function calcScore(cleared) {
+  const diff = G.difficulty || "normal";
+  const diffMult = { easy: 0.8, normal: 1.0, hard: 1.3 }[diff] || 1.0;
+  const roundScore  = G.round * 100;
+  const lvScore     = G.level * 10;
+  const lifeScore   = G.life * 50;
+  const clearBonus  = cleared ? 500 : 0;
+  return Math.round((roundScore + lvScore + lifeScore + clearBonus) * diffMult);
+}
+
+function saveScore(score, cleared) {
+  const diff = G.difficulty || "normal";
+  const now = new Date();
+  const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const entry = {
+    score,
+    round: G.round,
+    level: G.level,
+    life: G.life,
+    cleared,
+    date: dateStr
+  };
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(SCORE_KEY) || "{}"); } catch(e) {}
+  if (!data[diff]) data[diff] = [];
+  data[diff].push(entry);
+  data[diff].sort((a,b) => b.score - a.score);
+  data[diff] = data[diff].slice(0, 5);
+  try { localStorage.setItem(SCORE_KEY, JSON.stringify(data)); } catch(e) {}
+  return data[diff].findIndex(e => e === data[diff].find(x => x.score === score && x.date === dateStr)) + 1;
+}
+
+function loadScores(diff) {
+  try {
+    const data = JSON.parse(localStorage.getItem(SCORE_KEY) || "{}");
+    return data[diff] || [];
+  } catch(e) { return []; }
+}
+
+function renderScoreboard(diff) {
+  currentScoreTab = diff;
+  const scores = loadScores(diff);
+  const list = document.getElementById("score-list");
+  if (!list) return;
+  document.querySelectorAll(".score-tab").forEach(b => {
+    b.classList.toggle("active", b.textContent.includes(
+      {easy:"Easy", normal:"Normal", hard:"Hard"}[diff]
+    ));
+  });
+  if (scores.length === 0) {
+    list.innerHTML = `<div class="score-empty">まだ記録がありません</div>`;
+    return;
+  }
+  const medals = ["🥇","🥈","🥉","4","5"];
+  list.innerHTML = scores.map((e, i) => `
+    <div class="score-row rank-${i+1}">
+      <div class="score-rank">${medals[i]}</div>
+      <div class="score-info">
+        <div class="score-name">${e.cleared?"🏆 クリア":"Round "+e.round+"終了"} · Lv${e.level} · ❤${e.life} · ${e.date}</div>
+        <div class="score-pts">${e.score.toLocaleString()} pts</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function switchScoreTab(diff) { renderScoreboard(diff); }
 
 function showClearScreen() {
   Audio.stopBgm();
   Audio.playWin();
+  const diffLabel = { easy:"🌿 Easy", normal:"⚔️ Normal", hard:"🔥 Hard" }[G.difficulty||"normal"] || "Normal";
   const statsEl = document.getElementById("clear-stats");
-  if (statsEl) statsEl.textContent = `残りライフ: ❤ ${G.life}　　Lv: ${G.level}`;
+  if (statsEl) statsEl.textContent = `残りライフ: ❤ ${G.life}　　難易度: ${diffLabel}`;
+  const score = calcScore(true);
+  const rank = saveScore(score, true);
+  document.getElementById("clear-score-val").textContent = score.toLocaleString();
+  document.getElementById("clear-score-rank").textContent =
+    rank === 1 ? "🎉 新記録！" : `ランキング ${rank}位`;
   document.getElementById("clear-screen").style.display = "flex";
 }
 
-function showClearRanking() {
-  document.getElementById("clear-screen").style.display = "none";
+function showGameOver() {
+  Audio.stopBgm();
+  Audio.playLose();
+  const diffLabel = { easy:"🌿 Easy", normal:"⚔️ Normal", hard:"🔥 Hard" }[G.difficulty||"normal"] || "Normal";
+  document.getElementById("gameover-round").textContent = `Round ${G.round} で力尽きた…`;
+  document.getElementById("gameover-stats").textContent = `Lv: ${G.level}　　難易度: ${diffLabel}`;
+  const score = calcScore(false);
+  const rank = saveScore(score, false);
+  document.getElementById("gameover-score-val").textContent = score.toLocaleString();
+  document.getElementById("gameover-score-rank").textContent =
+    rank === 1 ? "🎉 自己ベスト！" : `ランキング ${rank}位`;
+  document.getElementById("gameover-screen").style.display = "flex";
+}
+
+function closeGameOver() {
+  document.getElementById("gameover-screen").style.display = "none";
   returnToTitle();
 }
 
@@ -2193,6 +2725,7 @@ function returnToTitle() {
   document.getElementById('battle-view').classList.remove('active');
   showSpeedBtns(false);
   Audio.playBgm('title');
+  renderScoreboard(G.difficulty || currentScoreTab || 'normal');
 }
 
 // ========== RENDER ==========
@@ -2259,25 +2792,43 @@ function renderShop() {
       const canAfford = G.gold >= entry.cost;
       card.className="shop-card "+(isEquip?"item-card":"magic-card")+(canAfford?"":" cant-afford");
       card.innerHTML=`
+        <div class="shop-tooltip">${entry.desc}</div>
         <div class="shop-icon">${entry.icon}</div>
         <div class="shop-name" style="font-size:9px">${entry.name}</div>
         <div class="item-type-badge ${isEquip?"item-type-equip":"item-type-magic"}">${isEquip?"装備":"魔法"}</div>
-        <div class="item-effect-text">${entry.desc}</div>
         <div class="shop-cost">${entry.cost}G</div>
       `;
       card.onclick=()=>buyShop(idx);
+      // モバイル：タップで一度ツールチップ表示、もう一度タップで購入
+      card.addEventListener('touchstart', (e) => {
+        const isActive = card.classList.contains('tooltip-active');
+        document.querySelectorAll('.shop-card.tooltip-active').forEach(c => c.classList.remove('tooltip-active'));
+        if (!isActive) {
+          card.classList.add('tooltip-active');
+          e.preventDefault();
+        }
+      }, { passive: false });
       el.appendChild(card); return;
     }
     const cost=entry.tier;
     const canAfford = G.gold >= cost;
     card.className="shop-card"+(canAfford?"":" cant-afford");
     card.innerHTML=`
+      <div class="shop-tooltip">⚔️ ATK ${entry.atk_base}　❤️ HP ${entry.hp_base}</div>
       <div class="shop-icon">${entry.icon}</div>
       <div class="shop-name">${entry.name}</div>
       <div class="tier-badge ${TIER_COLORS[entry.tier]}">T${entry.tier}</div>
       <div class="shop-cost">${cost}G</div>
     `;
     card.onclick=()=>buyShop(idx);
+    card.addEventListener('touchstart', (e) => {
+      const isActive = card.classList.contains('tooltip-active');
+      document.querySelectorAll('.shop-card.tooltip-active').forEach(c => c.classList.remove('tooltip-active'));
+      if (!isActive) {
+        card.classList.add('tooltip-active');
+        e.preventDefault();
+      }
+    }, { passive: false });
     el.appendChild(card);
   });
 }
@@ -2419,26 +2970,9 @@ function castMagicPrep(i) {
   else if (G.selectedItem > i) G.selectedItem--;
 
   addLog("magic", `✨ 魔法「${item.icon}${item.name}」発動！ ${item.desc}`);
+  tutOnMagicCast();
   updateMagicBanner();
   render();
-}
-
-function startDebug() {
-  document.getElementById('title-screen').classList.add('hidden');
-  document.getElementById('app').style.display='block';
-  newGame();
-
-  // デバッグ：神獣★3を全6マスに配置
-  const godDef = UNITS_DATA.find(u => u.id === "t5_god");
-  for (let r=0; r<2; r++) for (let c=0; c<3; c++) {
-    const u = makeUnit(godDef, 3);
-    G.board[r][c] = u;
-  }
-  G.gold = 99;
-  G.level = 10;
-  addLog("system", "🛠 デバッグモード：神獣★3 × 6体配置、所持金99G");
-  render();
-  Audio.playBgm('prep');
 }
 
 function sellInventoryItem(i) {
@@ -2487,6 +3021,7 @@ function equipItem(unit, loc) {
   G.inventory.splice(itemIdx, 1);
   G.selectedItem=null;
   addLog("gold",`${unit.icon}${unit.name} に ${item.icon}${item.name} を装着`);
+  tutOnEquip();
   return true;
 }
 
@@ -3103,16 +3638,282 @@ function ensureTitleBgm() {
 }
 
 function startGame() {
-  ensureTitleBgm(); // AudioContextを確実に起動
+  ensureTitleBgm();
+  document.getElementById('mode-modal').style.display = 'flex';
+}
+
+function startWithDifficulty(diff) {
+  document.getElementById('mode-modal').style.display = 'none';
   document.getElementById('title-screen').classList.add('hidden');
   document.getElementById('app').style.display = 'block';
   Audio.playBgm('prep');
   newGame();
+  G.difficulty = diff;
+  // ヘッダーに難易度バッジを表示
+  updateDifficultyBadge();
+  render();
+}
+
+function updateDifficultyBadge() {
+  let badge = document.getElementById('diff-badge');
+  if (!badge) return;
+  const diff = G.difficulty || 'normal';
+  const map = { easy: ['🌿 Easy','#6bff9e','rgba(107,255,158,0.15)'], normal: ['⚔️ Normal','#6a7fff','rgba(106,127,255,0.15)'], hard: ['🔥 Hard','#ff7070','rgba(255,80,80,0.15)'] };
+  const [label, color, bg] = map[diff] || map.normal;
+  badge.textContent = label;
+  badge.style.color = color;
+  badge.style.background = bg;
+  badge.style.border = `1px solid ${color}`;
+  badge.style.display = 'inline-block';
 }
 
 function startGameFromHowTo() {
   closeHowTo();
-  startGame();
+  document.getElementById('mode-modal').style.display = 'flex';
+}
+// ========== TUTORIAL ==========
+const TUT_STEPS = [
+  {
+    title: "👋 ようこそ！",
+    body: "これは <strong>Battle of Memories</strong>（オートバトラー）のチュートリアルです。\n\nショップでユニットを購入 → 装備・魔法で強化 → 合成 → 戦闘！の流れを一緒に学びましょう。",
+    target: null,
+    waitFor: null,
+    btnText: "はじめる →",
+    shopSetup: "units3",   // 同じユニット3体 + 装備 + 魔法
+  },
+  {
+    title: "🛒 ユニットを3体買おう（合成の準備）",
+    body: "ショップに <strong>同じユニットが3体</strong> 並んでいます。\n3体全て購入すると自動で <strong>合成（★アップ）</strong> が起きます！\n\nまず1体目を購入してみましょう。\n<span style='color:#f5c842;font-size:11px'>📱 スマホは1回目タップで詳細表示、2回目タップで購入</span>",
+    target: "shop",
+    waitFor: "buy3",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "⭐ 合成が発生した！",
+    body: "3体集まると自動的に合成され <strong>★2</strong> になりました！\n\n★1 × 3体 → ★2（ATK/HP 約1.8倍）\n★2 × 3体 → ★3（ATK/HP 約2.8倍）\n\n合成は盤面・ベンチをまたいで発動します。",
+    target: "player-board",
+    waitFor: null,
+    btnText: "すごい！次へ →",
+    shopSetup: "equip_magic",  // 装備と魔法をショップに並べる
+  },
+  {
+    title: "🗡 装備をショップで買おう",
+    body: "ショップに <strong>🗡 装備</strong> と <strong>✨ 魔法</strong> が並んでいます。\n\nまず <strong>装備</strong> を購入してみましょう。\n購入後インベントリに入ります。",
+    target: "shop",
+    waitFor: "buy_equip",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "🗡 装備をユニットに装着しよう",
+    body: "インベントリに装備が入りました！\n\n① アイテムをタップして選択\n② 装備させたいユニットをタップ\n\n装備するとATKやHPが上がります（1ユニット最大2個）。",
+    target: "item-panel",
+    waitFor: "equip",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "✨ 魔法をショップで買おう",
+    body: "次は <strong>魔法</strong> を購入してみましょう。\n魔法は使い捨てですが、準備フェーズにいつでも発動でき、持ち越しも可能です。",
+    target: "shop",
+    waitFor: "buy_magic",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "✨ 魔法を発動しよう",
+    body: "インベントリの魔法をタップして選択し、\nパネルの <strong>「✨ 発動」ボタン</strong> を押してみましょう！\n\n効果が即座にユニットに適用されます。",
+    target: "item-panel",
+    waitFor: "magic",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "⚔️ 戦闘を開始しよう",
+    body: "準備完了！<strong>「⚔️ 戦闘開始」ボタン</strong> を押して戦いましょう。\n\n速度ボタン（▶▶）で観戦スピードを変えられます。\nチュートリアルの敵はとても弱いので安心して！",
+    target: "btn-start",
+    waitFor: "battle",
+    btnText: "次へ →",
+    shopSetup: null,
+  },
+  {
+    title: "🎉 チュートリアル完了！",
+    body: "お疲れさまでした！全ての基本操作をマスターしました。\n\n<strong>ポイントまとめ：</strong>\n• 同じユニット3体 → 自動合成（★アップ）\n• 装備でATK/HP強化（1ユニット2個まで）\n• 魔法は準備フェーズに発動・持ち越し可\n• 全20ラウンド突破を目指せ！\n\nタイトルに戻ってノーマルモードで挑戦しよう！",
+    target: null,
+    waitFor: null,
+    btnText: "📖 How to Play を見る →",
+    shopSetup: null,
+  },
+];
+
+let tutState = { step: 0, active: false, buyCount: 0, boughtEquip: false, boughtMagic: false };
+
+function startTutorial() {
+  document.getElementById('mode-modal').style.display = 'none';
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('app').style.display = 'block';
+  Audio.playBgm('prep');
+  newGame();
+  G.gold = 50;
+  G.tutorialMode = true;
+  render();
+  tutState = { step: 0, active: true, buyCount: 0, boughtEquip: false, boughtMagic: false };
+  tutApplyShopSetup(TUT_STEPS[0].shopSetup);
+  showTutStep(0);
+}
+
+// チュートリアル専用ショップ設定
+function tutApplyShopSetup(setup) {
+  if (!setup) return;
+  if (setup === "units3") {
+    // 同じユニット（剣士）3体 + 装備 + 魔法
+    const swordDef = UNITS_DATA.find(u => u.id === "t1_sword");
+    const u1 = makeUnit(swordDef, 1);
+    const u2 = makeUnit(swordDef, 1);
+    const u3 = makeUnit(swordDef, 1);
+    const eq  = { ...ITEMS_DATA.find(i => i.id === "eq_sword"),  iid: ++G.uid, _isItem: true };
+    const mg  = { ...ITEMS_DATA.find(i => i.id === "mg_healall"), iid: ++G.uid, _isItem: true };
+    G.shop = [u1, u2, u3, eq, mg];
+  } else if (setup === "equip_magic") {
+    const eq = { ...ITEMS_DATA.find(i => i.id === "eq_sword"),  iid: ++G.uid, _isItem: true };
+    const mg = { ...ITEMS_DATA.find(i => i.id === "mg_healall"), iid: ++G.uid, _isItem: true };
+    G.shop = [eq, mg, null, null, null];
+  }
+  render();
+}
+
+function showTutStep(idx) {
+  if (idx >= TUT_STEPS.length) { tutEnd(); return; }
+  tutState.step = idx;
+  const step = TUT_STEPS[idx];
+  const total = TUT_STEPS.length;
+
+  if (step.shopSetup) tutApplyShopSetup(step.shopSetup);
+
+  document.getElementById('tut-overlay').style.display = 'block';
+  // waitFor がある場合は背景操作が必要なので暗幕を薄くしてタップ透過
+  const overlay = document.getElementById('tut-overlay');
+  if (step.waitFor) {
+    overlay.style.background = 'rgba(0,0,0,0.15)';
+    overlay.style.pointerEvents = 'none';
+  } else {
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.style.pointerEvents = 'all';
+  }
+  document.getElementById('tut-step-label').textContent = `STEP ${idx + 1} / ${total}`;
+  document.getElementById('tut-title').textContent = step.title;
+  document.getElementById('tut-body').innerHTML = step.body.replace(/\n/g, '<br>');
+
+  const prog = document.getElementById('tut-progress');
+  prog.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'tut-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+    prog.appendChild(d);
+  }
+
+  const btn = document.getElementById('tut-next-btn');
+  btn.textContent = step.btnText;
+  btn.disabled = !!step.waitFor;
+
+  document.querySelectorAll('.tut-highlight').forEach(e => e.classList.remove('tut-highlight'));
+  if (step.target) {
+    const el = document.getElementById(step.target);
+    if (el) el.classList.add('tut-highlight');
+  }
+}
+
+function tutNext() {
+  if (tutState.step >= TUT_STEPS.length - 1) { tutEnd(); return; }
+  showTutStep(tutState.step + 1);
+}
+
+function tutSkip() {
+  tutForceEnd();
+}
+
+function tutEnd() {
+  tutForceEnd();
+}
+
+function tutForceEnd() {
+  tutState.active = false;
+  document.getElementById('tut-overlay').style.display = 'none';
+  document.querySelectorAll('.tut-highlight').forEach(e => e.classList.remove('tut-highlight'));
+  G.tutorialMode = false;
+  // ゲーム画面を非表示にしてタイトル経由でHow to Playを表示
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('title-screen').classList.remove('hidden');
+  Audio.stopBgm();
+  Audio.playBgm('title');
+  showHowTo();
+}
+
+// チュートリアル：ユニット購入検知
+function tutOnBuy() {
+  if (!tutState.active) return;
+  const wf = TUT_STEPS[tutState.step].waitFor;
+  if (wf === "buy") {
+    document.getElementById('tut-next-btn').disabled = false;
+  }
+  if (wf === "buy3") {
+    tutState.buyCount = (tutState.buyCount || 0) + 1;
+    if (tutState.buyCount >= 3) {
+      document.getElementById('tut-next-btn').disabled = false;
+      document.getElementById('tut-next-btn').textContent = "合成を確認！ →";
+    } else {
+      document.getElementById('tut-body').innerHTML =
+        `ショップに <strong>同じユニットが3体</strong> 並んでいます。<br>3体全て購入すると自動で <strong>合成（★アップ）</strong> が起きます！<br><br>あと <strong>${3 - tutState.buyCount}体</strong> 購入しましょう。`;
+    }
+  }
+}
+
+// チュートリアル：装備購入検知
+function tutOnBuyEquip() {
+  if (!tutState.active) return;
+  if (TUT_STEPS[tutState.step].waitFor === "buy_equip") {
+    tutState.boughtEquip = true;
+    document.getElementById('tut-next-btn').disabled = false;
+    document.getElementById('tut-next-btn').textContent = "次へ →";
+  }
+}
+
+// チュートリアル：魔法購入検知
+function tutOnBuyMagic() {
+  if (!tutState.active) return;
+  if (TUT_STEPS[tutState.step].waitFor === "buy_magic") {
+    tutState.boughtMagic = true;
+    document.getElementById('tut-next-btn').disabled = false;
+    document.getElementById('tut-next-btn').textContent = "次へ →";
+  }
+}
+
+// チュートリアル：装備装着検知
+function tutOnEquip() {
+  if (!tutState.active) return;
+  if (TUT_STEPS[tutState.step].waitFor === "equip") {
+    document.getElementById('tut-next-btn').disabled = false;
+    document.getElementById('tut-next-btn').textContent = "次へ →";
+  }
+}
+
+// チュートリアル：魔法発動検知
+function tutOnMagicCast() {
+  if (!tutState.active) return;
+  if (TUT_STEPS[tutState.step].waitFor === "magic") {
+    document.getElementById('tut-next-btn').disabled = false;
+    document.getElementById('tut-next-btn').textContent = "次へ →";
+  }
+}
+
+// チュートリアル：戦闘開始検知
+function tutOnBattle() {
+  if (!tutState.active) return;
+  if (TUT_STEPS[tutState.step].waitFor === "battle") {
+    document.getElementById('tut-next-btn').disabled = false;
+    showTutStep(tutState.step + 1);
+  }
 }
 
 function showHowTo() {
@@ -3126,6 +3927,7 @@ function closeHowTo() {
 
 // ========== INIT ==========
 initParticles();
+renderScoreboard('normal');
 // タイトル画面への任意のインタラクションでBGM開始
 document.getElementById('title-screen').addEventListener('click', ensureTitleBgm, { once: false });
 
